@@ -1,2 +1,10 @@
 @import "tailwindcss";
 @plugin "daisyui";
+
+html {
+  scroll-behavior: smooth;
+}
+
+section[id] {
+  scroll-margin-top: 0px;
+}

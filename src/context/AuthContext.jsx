@@ -22,7 +22,7 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] =useState(null);
-
+  const [IdToken,setidToken]=useState(null);
   const [accessToken, setAccessToken]=
     useState(()=>{
       sessionStorage.getItem("access_token")
@@ -114,22 +114,24 @@ export const AuthProvider = ({ children }) => {
   )=>{
     setLoading(true);
     const {
-      firebaseUser,
+      firebase_user,
       idToken
     } = await createUser(email, password,obj);
     console.log("createFirebaseUser id token:",idToken);
-    console.log("createFirebaseUser firebaseUser:",firebaseUser);
+    console.log("createFirebaseUser firebaseUser:",firebase_user);
 
-    const response = await exchangeFirebaseToken(idToken);
-    console.log("response createFirebaseUser:",response);
-    setUser(response.user);
-    setAccessToken(response.access_token);
-    sessionStorage.setItem("access_token", response.access_token);
+    setidToken(idToken);
+
+    // const response = await exchangeFirebaseToken(idToken);
+    // console.log("response createFirebaseUser:",response);
+    // setUser(response.user);
+    // setAccessToken(response.access_token);
+    // sessionStorage.setItem("access_token", response.access_token);
 
     return {
-      firebaseUser,
-      user: response.user,
-      accessToken: response.access_token,
+      firebase_user,
+      // user: response.user,
+      // idToken,
     };
   }  
 
@@ -147,8 +149,11 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider value={
       {
       user,
+      setUser,
+      setAccessToken,
       accessToken, 
       loading,
+      IdToken,
       setLoading,
       login,
       createFirebaseUser,

@@ -44,7 +44,7 @@ export const createUser = async (
   
   console.log("createUser result:",result);
 
-  const firebaseUser = result.user;
+  const firebase_user = result.user;
 
   try{
     await updateProfile(auth.currentUser, obj);
@@ -53,11 +53,11 @@ export const createUser = async (
     console.log("Error updating profile:",error);
   }
 
-  const idToken = await firebaseUser.getIdToken();
+  const idToken = await firebase_user.getIdToken();
   console.log("IdToken Auth.service: ",idToken);
   
   return {
-    firebaseUser,
+    firebase_user,
     idToken,
   };
 };

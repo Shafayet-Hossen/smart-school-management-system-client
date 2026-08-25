@@ -1,14 +1,15 @@
 import RoleGuard from "./RoleGuard.jsx";
-import  ROLES  from "../constants/Roles.js";
+import ROLES from "../constants/Roles.js";
+import { NavLink } from "react-router-dom";
 
-const Sidebar = ({ currentUser }) => {
+
+const Sidebar = ({ user }) => {
   return (
     <aside>
-      <nav>
-
+      <nav className="flex gap-6">
         <RoleGuard
           allowedRoles={[ROLES.SCHOOL_ADMIN]}
-          userRole={currentUser?.role}
+          userRole={user?.role}
         >
           <a href="/students">
             Students
@@ -18,13 +19,28 @@ const Sidebar = ({ currentUser }) => {
         <RoleGuard
           allowedRoles={[
             ROLES.SCHOOL_ADMIN,
-            ROLES.TEACHER,
           ]}
-          userRole={currentUser?.role}
+          userRole={user?.role}
         >
-          <a href="/attendance">
+          <a href="/admin/attendance">
             Attendance
           </a>
+        </RoleGuard>
+
+        <RoleGuard
+          allowedRoles={[
+            ROLES.PARENT,
+          ]}
+          userRole={user?.role}
+        >
+          <NavLink
+            to="/parent/dashboard"
+            className={({ isActive }) =>
+              isActive ? "active" : ""
+            }
+          >
+            ParentDashboard
+          </NavLink>
         </RoleGuard>
 
         <RoleGuard
@@ -32,7 +48,7 @@ const Sidebar = ({ currentUser }) => {
             ROLES.SCHOOL_ADMIN,
             ROLES.TEACHER,
           ]}
-          userRole={currentUser?.role}
+          userRole={user?.role}
         >
           <a href="/results">
             Results
@@ -43,7 +59,7 @@ const Sidebar = ({ currentUser }) => {
           allowedRoles={[
             ROLES.STUDENT,
           ]}
-          userRole={currentUser?.role}
+          userRole={user?.role}
         >
           <a href="/my-results">
             My Results
