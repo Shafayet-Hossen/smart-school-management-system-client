@@ -21,7 +21,7 @@ function RegistrationComplete() {
 
     const [error, setError] = useState("");
 
-    const [completed, setCompleted] = useState(false);
+    // const [completed, setCompleted] = useState(false);
 
 
     const completeRegistration = async () => {
@@ -197,7 +197,7 @@ function RegistrationComplete() {
             }
 
 
-            setCompleted(true);
+            // setCompleted(true);
 
         } catch (err) {
             registrationStarted.current = false;
@@ -220,7 +220,6 @@ function RegistrationComplete() {
     };
 
     useEffect(() => {
-
         if (registrationStarted.current) {
             return;
         }
@@ -228,14 +227,10 @@ function RegistrationComplete() {
         registrationStarted.current = true;
 
         completeRegistration();
+
         console.log("CompleteRegistration_user:", user);
-
-
-    }, [
-        // navigate,
-        // registrationData,
-        // updateField,
-    ]);
+        
+    }, []);
 
 
     // Loading State

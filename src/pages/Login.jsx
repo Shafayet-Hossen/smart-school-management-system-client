@@ -1,6 +1,6 @@
 import { useState } from "react";
-import api from "../services/api.js";
-import { loginUser,} from "../services/auth.service.js";
+// import api from "../services/api.js";
+// import { loginUser,} from "../services/auth.service.js";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { Link } from "react-router-dom";
@@ -26,7 +26,7 @@ const Login = () => {
     setError("");
 
     try {
-      const {firebaseUser, user, accessToken} =
+      const {user, accessToken} =
         await login(
           email,
           password
@@ -158,7 +158,7 @@ const Login = () => {
               to="/register"
               className="btn btn-outline btn-primary w-full mt-3"
             >
-              Create an Account
+              Register an Account
             </Link>
 
           </div>

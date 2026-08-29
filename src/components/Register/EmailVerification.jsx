@@ -194,6 +194,7 @@ function EmailVerification() {
                         <div className="h-2 flex-1 rounded-full bg-primary" />
 
                         <div className="h-2 flex-1 rounded-full bg-primary" />
+                        
                         <div className="h-2 flex-1 rounded-full bg-primary" />
 
                     </div>

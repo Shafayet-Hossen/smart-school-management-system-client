@@ -103,7 +103,7 @@ export const AuthProvider = ({ children }) => {
     sessionStorage.setItem("access_token", response.access_token);
 
     return {
-      firebaseUser,
+      // firebaseUser,
       user: response.user,
       accessToken: response.access_token,
     };

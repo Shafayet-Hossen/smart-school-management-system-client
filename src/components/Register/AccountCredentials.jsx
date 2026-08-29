@@ -240,9 +240,9 @@ function AccountCredentials() {
 
     return (
         <div className="min-h-screen bg-base-200 px-4 py-10 sm:py-16">
-            <pre className="mt-8 rounded-xl bg-neutral p-4 text-xs text-neutral-content">
+            {/* <pre className="mt-8 rounded-xl bg-neutral p-4 text-xs text-neutral-content">
                 {JSON.stringify(registrationData, null, 2)}
-            </pre>
+            </pre> */}
             <div className="mx-auto max-w-3xl">
 
                 {/* ---------------------------------------------------------
@@ -296,7 +296,8 @@ function AccountCredentials() {
 
                         <div className="h-2 flex-1 rounded-full bg-primary" />
 
-                        <div className="h-2 flex-1 rounded-full bg-base-300" />
+                        <div className="h-2 flex-1 rounded-full bg-primary" />
+                        
                         <div className="h-2 flex-1 rounded-full bg-base-300" />
 
                     </div>

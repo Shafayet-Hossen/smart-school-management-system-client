@@ -135,9 +135,9 @@ function PersonalInformation() {
 
     return (
         <div className="min-h-screen bg-base-200 px-4 py-10 sm:py-16">
-            <pre className="mt-8 rounded-xl bg-neutral p-4 text-xs text-neutral-content">
+            {/* <pre className="mt-8 rounded-xl bg-neutral p-4 text-xs text-neutral-content">
                 {JSON.stringify(registrationData, null, 2)}
-            </pre>
+            </pre> */}
             <div className="mx-auto max-w-4xl">
 
                 {/* Header */}
