@@ -10,7 +10,9 @@ import { exchangeFirebaseToken } from "../../services/auth-api.service.js";
 function RegistrationComplete() {
     const navigate = useNavigate();
 
-    const { setLoading, setUser, user, setAccessToken } = useAuth();
+    const { setUser, user, setAccessToken } = useAuth();
+
+    const [loading, setLoading] = useState(true);
 
     const registrationStarted = useRef(false);
 
@@ -21,8 +23,7 @@ function RegistrationComplete() {
 
     const [error, setError] = useState("");
 
-    // const [completed, setCompleted] = useState(false);
-
+    console.log("RegistrationData:", registrationData);
 
     const completeRegistration = async () => {
 
@@ -235,30 +236,30 @@ function RegistrationComplete() {
 
     // Loading State
 
-    // if (loading) {
+    if (loading) {
 
-    //     return (
-    //         <div className="flex min-h-screen items-center justify-center bg-base-200 px-4">
+        return (
+            <div className="flex min-h-screen items-center justify-center bg-base-200 px-4">
 
-    //             <div className="text-center">
+                <div className="text-center">
 
-    //                 <span className="loading loading-spinner loading-lg text-primary" />
+                    <span className="loading loading-spinner loading-lg text-primary" />
 
-    //                 <h2 className="mt-6 text-xl font-bold">
-    //                     Setting up your school...
-    //                 </h2>
+                    <h2 className="mt-6 text-xl font-bold">
+                        Setting up your school...
+                    </h2>
 
-    //                 <p className="mt-2 text-sm text-base-content/60">
-    //                     Please wait while we complete your
-    //                     Smart School registration.
-    //                 </p>
+                    <p className="mt-2 text-sm text-base-content/60">
+                        Please wait while we complete your
+                        Smart School registration.
+                    </p>
 
-    //             </div>
+                </div>
 
-    //         </div>
-    //     );
+            </div>
+        );
 
-    // }
+    }
 
     // Error State
     if (error) {

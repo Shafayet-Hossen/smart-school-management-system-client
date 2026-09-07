@@ -1,6 +1,7 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { useRegistration } from "../../context/RegistrationContext.jsx";
+
 import { ROLE_ROUTES } from "../../utils/registrationRoles.jsx";
 
 const roles = [
@@ -35,17 +36,15 @@ const roles = [
 ];
 
 function RoleSelection() {
+
     const navigate = useNavigate();
+
     const {
         registrationData,
         updateField,
     } = useRegistration();
-    //   const [selectedRole, setSelectedRole] = useState("");
-    console.log("registrationData", registrationData);
-    // console.log("UpdateField",updateField);
 
     const selectedRole = registrationData.role;
-    console.log("SelectedRole", selectedRole)
 
     const handleContinue = () => {
         if (!selectedRole) return;
@@ -62,9 +61,6 @@ function RoleSelection() {
 
     return (
         <div className="min-h-screen bg-base-200 px-4 py-10 sm:py-16">
-            {/* <pre className="mt-8 rounded-xl bg-neutral p-4 text-xs text-neutral-content">
-                {JSON.stringify(registrationData, null, 2)}
-            </pre> */}
 
             <div className="mx-auto max-w-5xl">
 

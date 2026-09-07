@@ -1,18 +1,22 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-    // createUserWithEmailAndPassword,
-    sendEmailVerification,
-} from "firebase/auth";
 
-// import { auth } from "../../config/firebase.js";
+import { useNavigate } from "react-router-dom";
+
+
+
 import { useRegistration } from "../../context/RegistrationContext.jsx";
+
 import { useAuth } from "../../context/AuthContext.jsx";
+
+import { sendEmailVerification } from "firebase/auth";
 
 
 function AccountCredentials() {
     const navigate = useNavigate();
-    const { createFirebaseUser, loading, setLoading } = useAuth();
+    const { createFirebaseUser, 
+            loading, 
+            setLoading 
+            } = useAuth();
 
     const {
         registrationData,
@@ -120,14 +124,13 @@ function AccountCredentials() {
 
             const {
                 firebase_user,
-                // user,
-                // idToken,
+
             } =
                 await createFirebaseUser(
                     registrationData.email.trim(),
                     password, { displayName: registrationData.first_name, }
                 );
-            console.log("firebaseUser", firebase_user)
+
 
 
 
@@ -143,16 +146,7 @@ function AccountCredentials() {
             );
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | Store Firebase UID in Registration Context
-            |--------------------------------------------------------------------------
-            |
-            | This is temporary wizard state.
-            | The backend should ultimately trust the Firebase
-            | ID token rather than a UID sent from the frontend.
-            |
-            */
+
 
             updateField(
                 "firebase_uid",
@@ -170,7 +164,7 @@ function AccountCredentials() {
             | Navigate to Email Verification
             |--------------------------------------------------------------------------
             */
-            console.log("Create Account Successfull");
+
 
             navigate(
                 "/register/school_admin/verify"
@@ -240,9 +234,7 @@ function AccountCredentials() {
 
     return (
         <div className="min-h-screen bg-base-200 px-4 py-10 sm:py-16">
-            {/* <pre className="mt-8 rounded-xl bg-neutral p-4 text-xs text-neutral-content">
-                {JSON.stringify(registrationData, null, 2)}
-            </pre> */}
+            
             <div className="mx-auto max-w-3xl">
 
                 {/* ---------------------------------------------------------

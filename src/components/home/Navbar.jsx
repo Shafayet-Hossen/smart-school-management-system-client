@@ -220,6 +220,7 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 const navItems = [
   { name: "Home", path: "/" },
@@ -231,11 +232,12 @@ const navItems = [
 ];
 
 function Navbar() {
+  const {user} = useAuth();
   const [isOpen, setIsOpen] = useState(false);
-
+  console.log("Navbar user:", user);
   // Temporary authentication state.
   // This will be replaced with your actual Firebase/JWT auth state.
-  const isAuthenticated = false;
+  const isAuthenticated = !!user;
 
   const closeMenu = () => {
     setIsOpen(false);

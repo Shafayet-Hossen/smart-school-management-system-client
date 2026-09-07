@@ -21,7 +21,7 @@ function EmailVerification() {
     const [resending, setResending] = useState(false);
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
-
+    
     /*
     |--------------------------------------------------------------------------
     | Check whether email has been verified

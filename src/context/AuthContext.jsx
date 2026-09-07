@@ -89,7 +89,7 @@ export const AuthProvider = ({ children }) => {
   )=>{
     setLoading(true);
     const {
-      firebaseUser,
+      // firebaseUser,
       idToken
     } = await loginUser(email, password);
 

@@ -9,16 +9,13 @@ import JwtTest from "./pages/JwtTest.jsx";
 import ProtectedRoute from "./routes/ProtectedRoute.jsx";
 import Register from "./pages/Register.jsx";
 import RoleGuard from "./components/RoleGuard.jsx";
-import StudentDashboard from "./pages/student/StudentDashboard.jsx";
-import { useAuth } from "./context/AuthContext.jsx";
-import AttendanceDashboard from "./pages/admin/AttendanceDashboard.jsx";
-import ROLES from "./constants/Roles.js";
+
 import ParentDashboard from "./pages/parent/parentDashboard.jsx";
 import Home from "./pages/Home.jsx";
 import SubscriptionPlans from "./pages/SubscriptionPlans.jsx";
 import RoleSelection from "./components/Register/RoleSelection.jsx";
 import PersonalInformation from "./components/Register/PersonalInformation.jsx";
-// import RegistrationBranch from "./components/Register/RegistrationBranch.jsx"
+
 import SchoolAdminSchool from "./components/Register/SchoolAdminSchool.jsx";
 import TeacherSchool from "./components/Register/TeacherSchool.jsx";
 import StudentSchool from "./components/Register/StudentSchool.jsx";
@@ -41,10 +38,33 @@ import Dashboard from "./pages/dashboard/Dashboard.jsx";
 import TeacherRequests from "./pages/requests/TeacherRequests.jsx";
 import ParentRequests from "./pages/requests/parentRequests.jsx";
 import StudentRequests from "./pages/requests/studentRequests.jsx";
+import Profile from "./pages/profiles/Profile.jsx";
+import Teachers from "./pages/dashboard/teachers/Teachers.jsx";
+import AddTeacher from "./pages/dashboard/teachers/AddTeacher.jsx";
+import ViewTeacher from "./pages/dashboard/teachers/ViewTeacher.jsx";
+import EditTeacher from "./pages/dashboard/teachers/EditTeacher.jsx";
+import AddClass from "./pages/dashboard/classes/AddClass.jsx";
+import Classes from "./pages/dashboard/classes/Classes.jsx";
+import AddStudent from "./pages/dashboard/students/AddStudent.jsx";
+import Students from "./pages/dashboard/students/Students.jsx";
+import EditStudent from "./pages/dashboard/students/EditStudent.jsx";
+import AddParent from "./pages/dashboard/parents/AddParent.jsx";
+import Parents from "./pages/dashboard/parents/Parents.jsx";
+import ViewParent from "./pages/dashboard/parents/ViewParent.jsx";
+import Attendance from "./pages/dashboard/attendance/Attendance.jsx";
+import MyStudents from "./pages/teacher/MyStudents.jsx";
+import Assignments from "./pages/dashboard/teachers/Assignments.jsx";
+import CreateAssignment from "./pages/dashboard/teachers/CreateAssignment.jsx";
+import MyClasses from "./pages/dashboard/classes/MyClasses.jsx";
+import { useAuth } from "./context/AuthContext.jsx";
+import StudentDashboard from "./pages/dashboard/StudentDashboard.jsx";
+
+
 
 function App() {
+
   const { user } = useAuth();
-  // console.log("app:", user);
+
   return (
     <BrowserRouter>
       <Routes>
@@ -177,7 +197,13 @@ function App() {
           path="/requests/teachers"
           element={
             <ProtectedRoute>
-              <TeacherRequests />
+              <RoleGuard
+                allowedRoles={["school_admin"]}
+                userRole={user?.role}
+                fallback={<Navigate to="/unauthorized" replace />}
+              >
+                <TeacherRequests />
+              </RoleGuard>
             </ProtectedRoute>
           }
         />
@@ -185,7 +211,13 @@ function App() {
           path="/requests/parents"
           element={
             <ProtectedRoute>
-              <ParentRequests />
+              <RoleGuard
+                allowedRoles={["school_admin"]}
+                userRole={user?.role}
+                fallback={<Navigate to="/unauthorized" replace />}
+              >
+                <ParentRequests />
+              </RoleGuard>
             </ProtectedRoute>
           }
         />
@@ -193,12 +225,249 @@ function App() {
           path="/requests/students"
           element={
             <ProtectedRoute>
-              <StudentRequests />
+              <RoleGuard
+                allowedRoles={["school_admin"]}
+                userRole={user?.role}
+                fallback={<Navigate to="/unauthorized" replace />}
+              >
+                <StudentRequests />
+              </RoleGuard>
             </ProtectedRoute>
           }
         />
 
+
+        {/* Accout Profile */}
         <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Add Teachers */}
+        <Route
+          path="/teachers/add"
+          element={
+            <ProtectedRoute>
+              <RoleGuard
+                allowedRoles={["school_admin"]}
+                userRole={user?.role}
+                fallback={<Navigate to="/unauthorized" replace />}
+              >
+                <AddTeacher />
+              </RoleGuard>
+            </ProtectedRoute>
+          }
+        />
+        {/* Get Teachers */}
+        <Route
+          path="/teachers"
+          element={
+            <ProtectedRoute>
+              <RoleGuard
+                allowedRoles={["school_admin",]}
+                userRole={user?.role}
+                fallback={<Navigate to="/unauthorized" replace />}
+              >
+                <Teachers />
+              </RoleGuard>
+            </ProtectedRoute>
+          }
+        />
+        {/* View Teacher */}
+        <Route
+          path="/teachers/:teacherId"
+          element={
+            <ProtectedRoute>
+              <RoleGuard
+                allowedRoles={["school_admin"]}
+                userRole={user?.role}
+                fallback={<Navigate to="/unauthorized" replace />}
+              >
+                <ViewTeacher />
+              </RoleGuard>
+            </ProtectedRoute>
+          }
+        />
+        {/* Edit Teacher */}
+        <Route
+          path="/teachers/:teacherId/edit"
+          element={
+            <ProtectedRoute>
+              <RoleGuard
+                allowedRoles={["school_admin"]}
+                userRole={user?.role}
+                fallback={<Navigate to="/unauthorized" replace />}
+              >
+                <EditTeacher />
+              </RoleGuard>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Class Routes */}
+        <Route
+          path="/classes/add"
+          element={
+            <ProtectedRoute >
+              <RoleGuard
+                allowedRoles={["school_admin"]}
+                userRole={user?.role}
+                fallback={<Navigate to="/unauthorized" replace />}
+              >
+                <AddClass />
+              </RoleGuard>
+            </ProtectedRoute>
+          }
+        />
+        {/* Get Classes */}
+        <Route
+          path="/classes"
+          element={
+            <ProtectedRoute>
+              <Classes />
+            </ProtectedRoute>
+          }
+        />
+        {/* add Student */}
+        <Route
+          path="/students/add"
+          element={
+            <ProtectedRoute>
+              <RoleGuard
+                allowedRoles={["school_admin"]}
+                userRole={user?.role}
+                fallback={<Navigate to="/unauthorized" replace />}
+              >
+                <AddStudent />
+              </RoleGuard>
+              <AddStudent />
+            </ProtectedRoute>
+          }
+        />
+        {/* View Students */}
+        <Route
+          path="/students"
+          element={
+            <ProtectedRoute>
+              <RoleGuard
+                allowedRoles={["school_admin"]}
+                userRole={user?.role}
+                fallback={<Navigate to="/unauthorized" replace />}
+              >
+                <Students />
+              </RoleGuard>
+            </ProtectedRoute>
+          }
+        />
+        {/* Edit Student */}
+        <Route
+          path="/students/:studentId/edit"
+          element={
+            <ProtectedRoute>
+              <RoleGuard
+                allowedRoles={["school_admin"]}
+                userRole={user?.role}
+                fallback={<Navigate to="/unauthorized" replace />}
+              >
+                <EditStudent />
+              </RoleGuard>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* teacher Classes */}
+        <Route
+          path="/my-classes"
+          element={
+            <ProtectedRoute>
+                <MyClasses />
+            </ProtectedRoute>
+          }
+        />
+        {/* teacher Students */}
+        <Route
+          path="/my-students"
+          element={
+            <ProtectedRoute>
+              <RoleGuard
+                allowedRoles={["teacher"]}
+                userRole={user?.role}
+                fallback={<Navigate to="/unauthorized" replace />}
+              >
+                <MyStudents />
+              </RoleGuard>
+            </ProtectedRoute>
+          }
+        />
+        {/* Create Assignment */}
+        <Route
+          path="/assignments/create"
+          element={
+            <ProtectedRoute>
+              <RoleGuard
+                allowedRoles={["teacher"]}
+                userRole={user?.role}
+                fallback={<Navigate to="/unauthorized" replace />}
+              >
+                <CreateAssignment />
+              </RoleGuard>
+            </ProtectedRoute>
+          }
+        />
+        {/* Teacher Assignments */}
+        <Route
+          path="/assignments"
+          element={
+            <ProtectedRoute>
+              <Assignments />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* add parent */}
+        <Route
+          path="/parents/add"
+          element={
+            <ProtectedRoute>
+              <AddParent />
+            </ProtectedRoute>
+          }
+        />
+        {/* View Parents */}
+        <Route
+          path="/parents"
+          element={
+            <ProtectedRoute>
+              <Parents />
+            </ProtectedRoute>
+          }
+        />
+        {/*View parent details */}
+        <Route
+          path="/parents/:parentId"
+          element={
+            <ProtectedRoute>
+              <ViewParent />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Attendance Dashboard */}
+        <Route
+          path="/attendance"
+          element={
+            <ProtectedRoute>
+              <Attendance />
+            </ProtectedRoute>
+          }
+        />
+
+
+        {/* <Route
           path="/admin/attendance"
           element={
             <RoleGuard
@@ -210,7 +479,7 @@ function App() {
               <AttendanceDashboard></AttendanceDashboard>
             </RoleGuard>
           }
-        ></Route>
+        ></Route> */}
 
         <Route
           path="/dashboard/student"

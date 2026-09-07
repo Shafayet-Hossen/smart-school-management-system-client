@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import DashboardHeader
     from "../../components/dashboard/DashboardHeader.jsx";
 
@@ -95,9 +96,9 @@ function SchoolAdminDashboard({ user }) {
 
                             <div className="mt-4 grid gap-3 sm:grid-cols-2">
 
-                                <button className="btn btn-primary">
+                                <Link to="/teachers/add" className="btn btn-primary">
                                     Add Teacher
-                                </button>
+                                </Link>
 
                                 <button className="btn btn-outline">
                                     Add Student
