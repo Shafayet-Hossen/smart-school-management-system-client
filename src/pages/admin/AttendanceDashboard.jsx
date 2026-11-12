@@ -17,7 +17,7 @@ const AttendanceDashboard = () => {
 
     const loadAttendanceDashboard = async () => {
         try {
-            console.log("attendance Dashboard")
+            // console.log("attendance Dashboard")
             setLoading(true);
             setError("");
 
@@ -37,7 +37,7 @@ const AttendanceDashboard = () => {
 
             const summaryResponse = await api.get("/attendance-analytics/today")
             
-            console.log("summaryResponse",summaryResponse.data)
+            // console.log("summaryResponse",summaryResponse.data)
 
             setSummary(summaryResponse.data.data);
             // setClasses(classResponse.data.data);

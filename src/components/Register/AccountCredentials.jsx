@@ -1,28 +1,28 @@
 import { useState } from "react";
-
 import { useNavigate } from "react-router-dom";
-
-
-
 import { useRegistration } from "../../context/RegistrationContext.jsx";
-
 import { useAuth } from "../../context/AuthContext.jsx";
-
 import { sendEmailVerification } from "firebase/auth";
+import { useQuery } from "@tanstack/react-query";
+import api from "../../services/api.js";
 
 
 function AccountCredentials() {
     const navigate = useNavigate();
-    const { createFirebaseUser, 
-            loading, 
-            setLoading 
-            } = useAuth();
+    const { createFirebaseUser,
+        loading,
+        setLoading
+    } = useAuth();
 
     const {
         registrationData,
+        // updateRegistration,
         updateField,
     } = useRegistration();
-
+    // console.log(
+    //     "registrationData in AccountCredentials",
+    //     registrationData
+    // );
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -32,12 +32,70 @@ function AccountCredentials() {
 
     const [errors, setErrors] = useState({});
 
+    const registrationId = registrationData?.registration_id;
 
-    /*
-    |--------------------------------------------------------------------------
-    | Password Validation
-    |--------------------------------------------------------------------------
-    */
+    const {
+        data,
+        isPending,
+        isError,
+        error,
+    } = useQuery({
+        queryKey: ["registration-account-details", registrationId],
+
+        queryFn: async () => {
+            const response = await api.get(
+                `/registrations/${registrationId}/account-details`
+            );
+
+            return response.data.registration;
+        },
+
+        enabled: Boolean(registrationId),
+        retry: 1,
+    });
+
+    const accountDetails = data;
+
+    // useEffect(() => {
+    //     if (!accountDetails) return;
+
+    //     updateRegistration({
+    //         ...accountDetails,
+    //     });
+    // }, [accountDetails, updateRegistration]);
+
+    // console.log(
+    //     "Registration details in AccountCredentials",
+    //     registrationData
+    // );
+
+    if (!registrationId) {
+        return (
+            <div className="alert alert-warning">
+                Registration information is missing.
+                Please return to the payment-success page.
+            </div>
+        );
+    }
+
+    if (isPending) {
+        return (
+            <div className="flex min-h-screen items-center justify-center">
+                <span className="loading loading-spinner loading-lg" />
+                <span className="ml-3">Loading registration details...</span>
+            </div>
+        );
+    }
+
+    if (isError) {
+        return (
+            <div className="alert alert-error m-6">
+                {error?.response?.data?.message ||
+                    "Unable to load registration details."}
+            </div>
+        );
+    }
+
 
     const validatePassword = (password) => {
         const errors = {};
@@ -69,17 +127,10 @@ function AccountCredentials() {
         return errors;
     };
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Form Validation
-    |--------------------------------------------------------------------------
-    */
-
     const validateForm = () => {
         const newErrors = {};
 
-        if (!registrationData.email?.trim()) {
+        if (!accountDetails.email?.trim()) {
             newErrors.email =
                 "Email address is required.";
         }
@@ -98,11 +149,6 @@ function AccountCredentials() {
     };
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Create Firebase Account
-    |--------------------------------------------------------------------------
-    */
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -116,38 +162,59 @@ function AccountCredentials() {
 
         try {
 
-            /*
-            |--------------------------------------------------------------------------
-            | Create Firebase Authentication User
-            |--------------------------------------------------------------------------
-            */
 
             const {
                 firebase_user,
 
             } =
                 await createFirebaseUser(
-                    registrationData.email.trim(),
-                    password, { displayName: registrationData.first_name, }
+                    accountDetails.email.trim(),
+                    password, { displayName: accountDetails.first_name, }
                 );
 
 
-
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Send Firebase Email Verification
-            |--------------------------------------------------------------------------
-            */
 
             await sendEmailVerification(
                 firebase_user
             );
 
+            updateField(
+                "role",
+                accountDetails.role
+            );
 
-
-
+            updateField(
+                "email",
+                accountDetails.email.trim()
+            );
+            updateField(
+                "first_name",
+                accountDetails.first_name
+            );
+            updateField(
+                "last_name",
+                accountDetails.last_name
+            );
+            updateField(
+                "payment_status",
+                accountDetails.payment_status
+            );
+            updateField(
+                "registration_id",
+                accountDetails.registration_id
+            );
+            updateField(
+                "school_name",
+                accountDetails.school_name
+            );
+            updateField(
+                "school_type",
+                accountDetails.school_type
+            );
+            updateField(
+                "subscription_activated",
+                true
+            );
             updateField(
                 "firebase_uid",
                 firebase_user.uid
@@ -159,12 +226,10 @@ function AccountCredentials() {
             );
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | Navigate to Email Verification
-            |--------------------------------------------------------------------------
-            */
-
+            // console.log(
+            //     "registrationData after update",
+            //     registrationData
+            // );
 
             navigate(
                 "/register/school_admin/verify"
@@ -234,7 +299,7 @@ function AccountCredentials() {
 
     return (
         <div className="min-h-screen bg-base-200 px-4 py-10 sm:py-16">
-            
+
             <div className="mx-auto max-w-3xl">
 
                 {/* ---------------------------------------------------------
@@ -247,7 +312,7 @@ function AccountCredentials() {
                         type="button"
                         onClick={() =>
                             navigate(
-                                "/register/school_admin/school"
+                                "/register/school_admin/school/subscription"
                             )
                         }
                         className="mb-8 text-sm font-medium text-base-content/50 transition hover:text-primary"
@@ -289,7 +354,7 @@ function AccountCredentials() {
                         <div className="h-2 flex-1 rounded-full bg-primary" />
 
                         <div className="h-2 flex-1 rounded-full bg-primary" />
-                        
+
                         <div className="h-2 flex-1 rounded-full bg-base-300" />
 
                     </div>
@@ -326,9 +391,7 @@ function AccountCredentials() {
 
                         <input
                             type="email"
-                            value={
-                                registrationData.email || ""
-                            }
+                            value={accountDetails?.email ?? ""}
                             readOnly
                             className="input input-bordered w-full bg-base-200"
                         />
@@ -529,7 +592,7 @@ function AccountCredentials() {
                             disabled={loading}
                             onClick={() =>
                                 navigate(
-                                    "/register/school_admin/school"
+                                    "/register/school_admin/school/subscription"
                                 )
                             }
                             className="btn btn-ghost"

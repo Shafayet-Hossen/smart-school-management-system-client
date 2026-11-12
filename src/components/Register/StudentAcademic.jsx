@@ -99,22 +99,11 @@ function StudentAcademic() {
 
                     );
 
-                /*
-                |--------------------------------------------------------------------------
-                | Expected response
-                |--------------------------------------------------------------------------
-                |
-                | {
-                |   success: true,
-                |   classes: [...]
-                | }
-                |
-                */
 
                 const classList =
                     response.data?.classes || [];
 
-                console.log("ClassList:", classList);
+                // console.log("ClassList:", classList);
 
                 setClasses(classList);
 
@@ -169,22 +158,11 @@ function StudentAcademic() {
                         `/auth/classes/${classId}/sections`,
                     );
 
-                /*
-                |--------------------------------------------------------------------------
-                | Expected response
-                |--------------------------------------------------------------------------
-                |
-                | {
-                |   success: true,
-                |   sections: [...]
-                | }
-                |
-                */
 
                 const sectionList =
                     response.data?.sections || [];
 
-                console.log("sections:", sectionList)
+                // console.log("sections:", sectionList)
                 setSections(sectionList);
 
             } catch (error) {
@@ -227,13 +205,8 @@ function StudentAcademic() {
 
         setClassId(selectedClassId);
 
-        console.log("ClassId: ", selectedClassId);
+        // console.log("ClassId: ", selectedClassId);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Reset section when class changes
-        |--------------------------------------------------------------------------
-        */
 
         setSectionId("");
 

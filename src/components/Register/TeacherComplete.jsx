@@ -12,7 +12,7 @@ import { useAuth } from "../../context/AuthContext.jsx";
 function TeacherComplete() {
     const navigate = useNavigate();
 
-    const { setLoading, user,  } = useAuth();
+    const { setLoading, user, } = useAuth();
 
     const {
         registrationData,
@@ -141,10 +141,10 @@ function TeacherComplete() {
                     "Bangladesh",
             };
 
-            console.log(
-                "Teacher registration payload:",
-                payload
-            );
+            // console.log(
+            //     "Teacher registration payload:",
+            //     payload
+            // );
 
             /*
             |--------------------------------------------------------------------------
@@ -165,10 +165,10 @@ function TeacherComplete() {
             );
 
 
-            console.log(
-                "Teacher registration response:",
-                response.data
-            );
+            // console.log(
+            //     "Teacher registration response:",
+            //     response.data
+            // );
 
             /*
             |--------------------------------------------------------------------------
@@ -261,7 +261,7 @@ function TeacherComplete() {
 
         completeRegistration();
 
-        console.log("CompleteRegistration_user:", user);
+        // console.log("CompleteRegistration_user:", user);
 
     }, []);
 
@@ -286,12 +286,14 @@ function TeacherComplete() {
     |--------------------------------------------------------------------------
     */
 
+    // const handleLogin = () => {
+    //     navigate("/login", {
+    //         replace: true,
+    //     });
+    // };
     const handleLogin = () => {
-        navigate("/login", {
-            replace: true,
-        });
+        window.location.href = "/login";
     };
-
     /*
     |--------------------------------------------------------------------------
     | PROCESSING

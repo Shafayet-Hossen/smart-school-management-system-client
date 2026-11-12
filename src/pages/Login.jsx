@@ -32,18 +32,28 @@ const Login = () => {
           password
         );
 
-      console.log(
-        "Firebase ID Token:",
-        accessToken
-      );
-      console.log(
-        "Login successful:",
-        user
-      );
+      // console.log(
+      //   "Firebase ID Token:",
+      //   accessToken
+      // );
+      // console.log(
+      //   "Login successful:",
+      //   user
+      // );
 
       // await testBackendAuth();
-
-      navigate("/dashboard");
+      if(user.role === "school_admin") {
+      navigate("/school-admin/dashboard");
+      }
+      else if(user.role === "teacher") {
+        navigate("/teacher/dashboard");
+      }
+      else if(user.role === "parent") {
+        navigate("/parent/dashboard");
+      }
+      else if(user.role === "student") {
+        navigate("/student/dashboard");
+      }
 
     } catch (error) {
       console.error(error);
@@ -55,25 +65,7 @@ const Login = () => {
       setLoading(false);
     }
   };
-  // const testBackendAuth = async () => {
-  //   try {
-  //     const response = await api.get(
-  //       "/auth-test/me"
-  //     );
-
-  //     console.log(
-  //       "Backend response:",
-  //       response.data
-  //     );
-  //   } catch (error) {
-  //     console.error(
-  //       "Backend authentication failed:",
-  //       error.response?.data ||
-  //       error.message
-  //     );
-  //   }
-  // };
-
+  
   return (
     <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
       <div className="card w-full max-w-md bg-base-100 shadow-xl">

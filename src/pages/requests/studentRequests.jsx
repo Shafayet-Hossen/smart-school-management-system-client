@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 
 import api from "../../services/api.js";
 import { useAuth } from "../../context/AuthContext.jsx";
@@ -7,7 +7,7 @@ import { useAuth } from "../../context/AuthContext.jsx";
 
 function StudentRequests() {
 
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
 
     const { user } = useAuth();
 
@@ -40,7 +40,7 @@ function StudentRequests() {
                     "/school-admin/requests/students"
                 );
             
-            console.log("StudentRequests:",response.data.data)
+            // console.log("StudentRequests:",response.data.data)
 
             if (response.data.success) {
 
@@ -101,7 +101,7 @@ function StudentRequests() {
     ) => {
 
         try {
-            console.log("requestId:",requestId)
+            // console.log("requestId:",requestId)
             setActionLoading(requestId);
 
             setError("");
@@ -230,11 +230,11 @@ function StudentRequests() {
     |--------------------------------------------------------------------------
     */
 
-    const handleBack = () => {
+    // const handleBack = () => {
 
-        navigate("/dashboard");
+    //     navigate("/dashboard");
 
-    };
+    // };
 
 
     /*
@@ -277,7 +277,7 @@ function StudentRequests() {
 
                 <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
 
-                    <div>
+                    {/* <div>
 
                         <button
                             onClick={handleBack}
@@ -286,7 +286,7 @@ function StudentRequests() {
                             ← Dashboard
                         </button>
 
-                    </div>
+                    </div> */}
 
 
                     <div>

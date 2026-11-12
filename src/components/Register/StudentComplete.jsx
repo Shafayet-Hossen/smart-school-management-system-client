@@ -31,7 +31,7 @@ function StudentComplete() {
     | Complete Teacher Registration
     |--------------------------------------------------------------------------
     */
-    console.log("registrationData: ", registrationData);
+    // console.log("registrationData: ", registrationData);
 
     const completeRegistration = async () => {
 
@@ -103,8 +103,8 @@ function StudentComplete() {
             const payload = {
                 role: "student",
 
-                roll_number: registrationData.roll_number||null,
-                
+                roll_number: registrationData.roll_number || null,
+
                 first_name:
                     registrationData.first_name,
 
@@ -125,7 +125,7 @@ function StudentComplete() {
                     registrationData.school_id,
 
                 school_name:
-                    registrationData.school_name || "",  
+                    registrationData.school_name || "",
 
                 class_code:
                     registrationData.class_code,
@@ -138,7 +138,7 @@ function StudentComplete() {
 
                 section_name:
                     registrationData.section_name || "",
-                
+
                 student_id:
                     registrationData.student_id || "",
 
@@ -153,10 +153,10 @@ function StudentComplete() {
                     "Bangladesh",
             };
 
-            console.log(
-                "Teacher registration payload:",
-                payload
-            );
+            // console.log(
+            //     "Teacher registration payload:",
+            //     payload
+            // );
 
             /*
             |--------------------------------------------------------------------------
@@ -177,10 +177,10 @@ function StudentComplete() {
             );
 
 
-            console.log(
-                "Student registration response:",
-                response.data
-            );
+            // console.log(
+            //     "Student registration response:",
+            //     response.data
+            // );
 
             /*
             |--------------------------------------------------------------------------
@@ -197,7 +197,7 @@ function StudentComplete() {
 
             }
 
-            
+
 
             // ----------------------------------
             updateField(
@@ -293,10 +293,14 @@ function StudentComplete() {
     |--------------------------------------------------------------------------
     */
 
+    // const handleLogin = () => {
+    //     navigate("/login", {
+    //         replace: true,
+    //     });
+    // };
+
     const handleLogin = () => {
-        navigate("/login", {
-            replace: true,
-        });
+        window.location.href = "/login";
     };
 
     /*

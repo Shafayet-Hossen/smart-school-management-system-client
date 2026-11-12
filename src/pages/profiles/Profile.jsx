@@ -46,7 +46,7 @@ function Profile({ user }) {
                         "/profile"
                     );
 
-                console.log("Profile",response.data)
+                // console.log("Profile",response.data)
                 if (!cancelled) {
 
                     setProfile(
@@ -244,8 +244,8 @@ function Profile({ user }) {
 */
 
 function ProfileLayout({
-    user,
-    role,
+    // user,
+    // role,
     children,
 }) {
 
@@ -253,16 +253,16 @@ function ProfileLayout({
 
         <div className="min-h-screen bg-base-200">
 
-            <DashboardSidebar
+            {/* <DashboardSidebar
                 role={role}
-            />
+            /> */}
 
 
-            <div className="lg:pl-72">
+            <div className="">
 
-                <DashboardHeader
+                {/* <DashboardHeader
                     user={user}
-                />
+                /> */}
 
 
                 <main className="p-4 sm:p-6 lg:p-8">

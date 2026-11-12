@@ -78,8 +78,8 @@ function AddTeacher() {
 
         setLoading(true);
 
-        console.log("Submitting form data:", formData
-        );  
+        // console.log("Submitting form data:", formData
+        // );  
         try {
 
             const response =
@@ -88,7 +88,7 @@ function AddTeacher() {
                     formData
                 );
 
-            console.log("Add teacher response:", response.data);
+            // console.log("Add teacher response:", response.data);
             if (!response.data.success) {
 
                 setError(
@@ -115,7 +115,7 @@ function AddTeacher() {
             setTimeout(() => {
 
                 navigate(
-                    "/teachers"
+                    "/school-admin/teachers"
                 );
 
             }, 1000);
@@ -152,7 +152,7 @@ function AddTeacher() {
     const handleCancel = () => {
 
         navigate(
-            "/teachers"
+            "/school-admin/teachers"
         );
 
     };
@@ -170,13 +170,13 @@ function AddTeacher() {
 
                 <div className="mb-8">
 
-                    <button
+                    {/* <button
                         type="button"
                         onClick={handleCancel}
                         className="mb-4 text-sm text-base-content/50 hover:text-primary"
                     >
                         ← Back to Teachers
-                    </button>
+                    </button> */}
 
 
                     <h1 className="text-3xl font-bold">

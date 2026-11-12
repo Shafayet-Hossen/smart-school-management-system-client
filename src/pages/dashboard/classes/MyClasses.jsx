@@ -1,140 +1,155 @@
-import {
-    Navigate,
-} from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { getTeacherClasses } from "../../../services/teacherClassService.js";
+import { useNavigate } from "react-router-dom";
 
-import TeacherMyClasses from "../../teacher/TeacherMyClasses.jsx";
-import StudentMyClasses from "../students/StudentMyClasses.jsx";
-import { useAuth } from "../../../context/AuthContext.jsx";
-
-
-
-function MyClasses() {
-
+const MyClasses = () => {
+    const navigate = useNavigate();
     const {
-        user,
-        loading,
-    } = useAuth();
+        data: classes = [],
+        isLoading,
+        isError,
+        error,
+    } = useQuery({
+        queryKey: ["teacher-classes"],
+        queryFn: getTeacherClasses,
+    });
 
-    // console.log("MyClasses user:", user);
-
-    if (loading) {
-
+    if (isLoading) {
         return (
-            <div className="flex min-h-screen items-center justify-center bg-base-200">
-
-                <span className="loading loading-spinner loading-lg text-primary" />
-
+            <div className="flex justify-center items-center min-h-64">
+                <span className="loading loading-spinner loading-lg"></span>
             </div>
         );
-
     }
 
-
-
-    if (!user) {
-
+    if (isError) {
         return (
-            <Navigate
-                to="/login"
-                replace
-            />
+            <div className="alert alert-error">
+                <span>
+                    {error?.response?.data?.message ||
+                        "Failed to load your classes."}
+                </span>
+            </div>
         );
-
     }
 
+    const handleBack = () => {
 
-    const role =
-        user.role;
+        navigate("/dashboard");
 
-
-
-    // if (role === "school_admin") {
-
-    //     return (
-    //         <SchoolAdminDashboard
-    //             user={user}
-    //         />
-    //     );
-
-    // }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Teacher
-    |--------------------------------------------------------------------------
-    */
-
-    if (role === "teacher") {
-
-        return (
-            <TeacherMyClasses/>
-        );
-
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Student
-    |--------------------------------------------------------------------------
-    */
-
-    if (role === "student") {
-
-        return (
-            <StudentMyClasses/>
-        );
-
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Parent
-    |--------------------------------------------------------------------------
-    */
-
-    // if (role === "parent") {
-
-    //     return (
-    //         <ParentDashboard
-    //             user={user}
-    //         />
-    //     );
-
-    // }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Unknown role
-    |--------------------------------------------------------------------------
-    */
+    };
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-base-200 px-4">
-
-            <div className="max-w-md rounded-2xl border border-error/20 bg-base-100 p-8 text-center shadow">
-
-                <div className="text-4xl">
-                    ⚠️
-                </div>
-
-                <h1 className="mt-4 text-xl font-bold">
-                    Invalid Account Role
-                </h1>
-
-                <p className="mt-2 text-sm text-base-content/60">
-                    Your account does not have a valid
-                    Smart School role.
-                </p>
+        <div className="p-6">
+            <div>
+                <button
+                    onClick={handleBack}
+                    className="text-sm font-medium text-base-content/50 hover:text-primary hover:cursor-pointer"
+                >
+                    ← Dashboard
+                </button>
 
             </div>
+            {/* Page Header */}
+            <div className="mb-6">
+                <h1 className="text-3xl font-bold">
+                    My Classes
+                </h1>
 
+                <p className="text-base-content/70 mt-1">
+                    View the classes and sections assigned to you.
+                </p>
+            </div>
+
+            {/* No Classes */}
+            {classes.length === 0 ? (
+                <div className="card bg-base-100 shadow">
+                    <div className="card-body items-center text-center">
+                        <div className="text-5xl mb-3">
+                            🏫
+                        </div>
+
+                        <h2 className="card-title">
+                            No Classes Assigned
+                        </h2>
+
+                        <p className="text-base-content/70">
+                            You have not been assigned to any class or
+                            section yet.
+                        </p>
+                    </div>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+
+                    {classes.map((classItem) => (
+                        <div
+                            key={classItem._id}
+                            className="card bg-base-100 shadow-md hover:shadow-lg transition-shadow"
+                        >
+                            <div className="card-body">
+
+                                {/* Class Name */}
+                                <h2 className="card-title text-xl">
+                                    {classItem.name}
+                                </h2>
+
+                                {/* Description */}
+                                {classItem.description && (
+                                    <p className="text-sm text-base-content/70">
+                                        {classItem.description}
+                                    </p>
+                                )}
+
+                                {/* Sections */}
+                                <div className="mt-4">
+
+                                    <div className="flex justify-between items-center mb-3">
+                                        <h3 className="font-semibold">
+                                            Assigned Sections
+                                        </h3>
+
+                                        <span className="badge badge-primary">
+                                            {classItem.sections?.length || 0}
+                                        </span>
+                                    </div>
+
+                                    <div className="space-y-2">
+
+                                        {classItem.sections?.map((section) => (
+                                            <div
+                                                key={section._id}
+                                                className="flex items-center justify-between p-3 bg-base-200 rounded-lg"
+                                            >
+                                                <div>
+                                                    <p className="font-medium">
+                                                        {section.name}
+                                                    </p>
+
+                                                    {section.description && (
+                                                        <p className="text-xs text-base-content/60">
+                                                            {section.description}
+                                                        </p>
+                                                    )}
+                                                </div>
+
+                                                <span className="badge badge-success">
+                                                    Assigned
+                                                </span>
+                                            </div>
+                                        ))}
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    ))}
+
+                </div>
+            )}
         </div>
     );
-
-}
+};
 
 export default MyClasses;

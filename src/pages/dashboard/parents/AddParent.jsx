@@ -224,7 +224,7 @@ const AddParent = () => {
         status:
           formData.status,
       };
-      console.log("Payload:", payload);
+      // console.log("Payload:", payload);
       const response = await api.post(
         "/parents",
         payload
@@ -236,7 +236,7 @@ const AddParent = () => {
         );
 
         setTimeout(() => {
-          navigate("/parents");
+          navigate("/school-admin/parents");
         }, 800);
       }
     } catch (error) {
@@ -296,14 +296,14 @@ const AddParent = () => {
           </p>
         </div>
 
-        <button
+        {/* <button
           type="button"
           className="btn btn-outline"
           onClick={() => navigate("/parents")}
           disabled={saving}
         >
           Back
-        </button>
+        </button> */}
 
       </div>
 
@@ -866,7 +866,7 @@ const AddParent = () => {
           <button
             type="button"
             className="btn btn-outline"
-            onClick={() => navigate("/parents")}
+            onClick={() => navigate("/school-admin/parents")}
             disabled={saving}
           >
             Cancel

@@ -123,7 +123,7 @@ function ViewTeacher() {
 
     const handleBack = () => {
 
-        navigate("/teachers");
+        navigate("/school-admin/teachers");
 
     };
 
@@ -137,7 +137,7 @@ function ViewTeacher() {
     const handleEdit = () => {
 
         navigate(
-            `/teachers/${teacherId}/edit`
+            `/school-admin/teachers/${teacherId}/edit`
         );
 
     };

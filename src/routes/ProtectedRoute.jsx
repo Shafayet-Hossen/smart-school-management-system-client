@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 const ProtectedRoute = ({ children }) => {
   
   const { user, loading } = useAuth();
-  console.log("ProtectedRoute user:", user);
+  // console.log("ProtectedRoute user:", user);
   // Wait until Firebase authentication state is determined
   if (loading) {
     return (

@@ -118,8 +118,8 @@ const EditStudent = () => {
         nid: student.nid || "",
         address: student.address || "",
 
-        class_id: student.class_id
-          ? String(student.class_id)
+        class_code: student.class_code
+          ? String(student.class_code)
           : "",
 
         section_id: student.section_id
@@ -292,7 +292,7 @@ const EditStudent = () => {
         <button
           type="button"
           className="btn btn-outline"
-          onClick={() => navigate("/students")}
+          onClick={() => navigate("/school-admin/students")}
         >
           Back
         </button>
@@ -522,7 +522,7 @@ const EditStudent = () => {
                 </label>
 
                 <select
-                  name="class_id"
+                  name="class_code"
                   value={formData.class_code}
                   onChange={handleClassChange}
                   className="select select-bordered w-full"
@@ -720,7 +720,7 @@ const EditStudent = () => {
             type="button"
             className="btn btn-outline"
             onClick={() =>
-              navigate("/students")
+              navigate("/school-admin/students")
             }
             disabled={saving}
           >

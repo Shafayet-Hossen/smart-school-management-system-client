@@ -8,6 +8,7 @@ function Classes() {
   const [classes, setClasses] = useState([]);
 
   const [loading, setLoading] = useState(true);
+
   const [error, setError] = useState("");
 
   const [selectedClass, setSelectedClass] = useState(null);
@@ -15,14 +16,17 @@ function Classes() {
   const [showSectionModal, setShowSectionModal] = useState(false);
 
   const [sections, setSections] = useState([]);
+
   const [loadingSections, setLoadingSections] = useState(false);
 
   const [sectionName, setSectionName] = useState("");
+
   const [sectionDescription, setSectionDescription] = useState("");
 
   const [addingSection, setAddingSection] = useState(false);
 
   const [deletingClassId, setDeletingClassId] = useState(null);
+
   const [deletingSectionId, setDeletingSectionId] = useState(null);
 
   // --------------------------------------------------
@@ -36,7 +40,7 @@ function Classes() {
       const response = await api.get("/classes");
 
       if (response.data?.success) {
-        console.log("Fetched classes:", response.data.data);
+        // console.log("Fetched classes:", response.data.data);
         setClasses(response.data.data || []);
       } else {
         setClasses([]);
@@ -46,7 +50,7 @@ function Classes() {
 
       setError(
         err.response?.data?.message ||
-          "Failed to load classes. Please try again."
+        "Failed to load classes. Please try again."
       );
     } finally {
       setLoading(false);
@@ -70,7 +74,7 @@ function Classes() {
     setSectionName("");
     setSectionDescription("");
 
-    await fetchSections(classItem._id);
+    await fetchSections(classItem.class_code);
   };
 
   // --------------------------------------------------
@@ -88,14 +92,15 @@ function Classes() {
   // --------------------------------------------------
   // Fetch Sections
   // --------------------------------------------------
-  const fetchSections = async (classId) => {
+  const fetchSections = async (class_code) => {
     try {
       setLoadingSections(true);
 
       const response = await api.get(
-        `/sections/classes/${classId}`
+        `/sections/classes/${class_code}`
       );
 
+      // console.log("Fetched sections:", response.data.data);
       if (response.data?.success) {
         setSections(response.data.data || []);
       } else {
@@ -108,7 +113,7 @@ function Classes() {
 
       setError(
         err.response?.data?.message ||
-          "Failed to load sections."
+        "Failed to load sections."
       );
     } finally {
       setLoadingSections(false);
@@ -143,12 +148,12 @@ function Classes() {
         `/sections/classes/${selectedClass._id}`,
         payload
       );
-
+      // console.log("Add section response:", response.data);
       if (response.data?.success) {
         setSectionName("");
         setSectionDescription("");
 
-        await fetchSections(selectedClass._id);
+        await fetchSections(selectedClass.class_code);
 
         // Refresh class list because section count may change
         await fetchClasses();
@@ -158,7 +163,7 @@ function Classes() {
 
       setError(
         err.response?.data?.message ||
-          "Failed to add section."
+        "Failed to add section."
       );
     } finally {
       setAddingSection(false);
@@ -186,7 +191,7 @@ function Classes() {
       );
 
       if (response.data?.success) {
-        await fetchSections(selectedClass._id);
+        await fetchSections(selectedClass.class_code);
         await fetchClasses();
       }
     } catch (err) {
@@ -194,7 +199,7 @@ function Classes() {
 
       setError(
         err.response?.data?.message ||
-          "Failed to delete section."
+        "Failed to delete section."
       );
     } finally {
       setDeletingSectionId(null);
@@ -204,7 +209,7 @@ function Classes() {
   // --------------------------------------------------
   // Delete Class
   // --------------------------------------------------
-  const handleDeleteClass = async (classId) => {
+  const handleDeleteClass = async (class_id) => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this class?"
     );
@@ -214,16 +219,16 @@ function Classes() {
     }
 
     try {
-      setDeletingClassId(classId);
+      setDeletingClassId(class_id);
       setError("");
 
       const response = await api.delete(
-        `/classes/${classId}`
+        `/classes/${class_id}`
       );
 
       if (response.data?.success) {
         setClasses((previous) =>
-          previous.filter((item) => item._id !== classId)
+          previous.filter((item) => item._id !== class_id)
         );
       }
     } catch (err) {
@@ -231,12 +236,18 @@ function Classes() {
 
       setError(
         err.response?.data?.message ||
-          "Failed to delete class."
+        "Failed to delete class."
       );
     } finally {
       setDeletingClassId(null);
     }
   };
+
+  // const handleBack = () => {
+
+  //   navigate("/dashboard");
+
+  // };
 
   // --------------------------------------------------
   // Render Loading
@@ -256,6 +267,16 @@ function Classes() {
   return (
     <div className="min-h-screen bg-base-200">
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        {/* <div>
+
+          <button
+            onClick={handleBack}
+            className="text-sm font-medium text-base-content/50 hover:text-primary hover:cursor-pointer"
+          >
+            ← Dashboard
+          </button>
+
+        </div> */}
 
         {/* ========================================= */}
         {/* HEADER */}
@@ -263,12 +284,12 @@ function Classes() {
 
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="breadcrumbs text-sm">
+            {/* <div className="breadcrumbs text-sm">
               <ul>
                 <li>Academic</li>
                 <li>Classes</li>
               </ul>
-            </div>
+            </div> */}
 
             <h1 className="mt-2 text-2xl font-bold sm:text-3xl">
               Classes
@@ -281,7 +302,7 @@ function Classes() {
 
           <button
             type="button"
-            onClick={() => navigate("/classes/add")}
+            onClick={() => navigate("/school-admin/add-classes")}
             className="btn btn-primary"
           >
             <span className="text-lg">+</span>
@@ -449,7 +470,7 @@ function Classes() {
                       {/* Sections */}
                       <td>
                         <span className="badge badge-neutral">
-                          {classItem.section_count || 0}
+                          {classItem.sections_count || 0}
                         </span>
                       </td>
 
@@ -471,7 +492,7 @@ function Classes() {
                             type="button"
                             onClick={() =>
                               navigate(
-                                `/classes/${classItem._id}/edit`
+                                `/school-admin/classes/${classItem._id}/edit`
                               )
                             }
                             className="btn btn-sm btn-ghost"
@@ -493,7 +514,7 @@ function Classes() {
                             className="btn btn-sm btn-error btn-outline"
                           >
                             {deletingClassId ===
-                            classItem._id ? (
+                              classItem._id ? (
                               <span className="loading loading-spinner loading-xs"></span>
                             ) : (
                               "Delete"
@@ -702,7 +723,7 @@ function Classes() {
                         className="btn btn-sm btn-error btn-outline"
                       >
                         {deletingSectionId ===
-                        section._id ? (
+                          section._id ? (
                           <span className="loading loading-spinner loading-xs"></span>
                         ) : (
                           "Delete"

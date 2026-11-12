@@ -23,7 +23,9 @@ function ParentVerify() {
         registrationData,
         updateField,
     } = useRegistration();
-    console.log("registrationData", registrationData);
+
+    // console.log("registrationData", registrationData);
+    
     const [resending, setResending] = useState(false);
 
     const [message, setMessage] = useState("");

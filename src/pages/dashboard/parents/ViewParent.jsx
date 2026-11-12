@@ -189,7 +189,7 @@ const ViewParent = () => {
           type="button"
           className="btn btn-outline"
           onClick={() =>
-            navigate("/parents")
+            navigate("/school-admin/parents")
           }
         >
           ← Back to Parents
@@ -205,7 +205,7 @@ const ViewParent = () => {
       ====================================================== */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
-          <div className="breadcrumbs text-sm mb-2">
+          {/* <div className="breadcrumbs text-sm mb-2">
             <ul>
               <li>
                 <Link
@@ -220,7 +220,7 @@ const ViewParent = () => {
                 {getParentName()}
               </li>
             </ul>
-          </div>
+          </div> */}
 
           <h1 className="text-3xl font-bold">
             {getParentName()}
@@ -234,14 +234,14 @@ const ViewParent = () => {
 
         <div className="flex flex-wrap gap-2">
           <Link
-            to="/parents"
+            to="/school-admin/parents"
             className="btn btn-outline"
           >
             ← Back
           </Link>
 
           <Link
-            to={`/parents/${parentId}/edit`}
+            to={`/school-admin/parents/${parentId}/edit`}
             className="btn btn-warning"
           >
             Edit Parent
@@ -557,7 +557,7 @@ const ViewParent = () => {
 
                         <td>
                           {
-                            student.class_name ||
+                            student.class_code ||
                             "-"
                           }
                         </td>
@@ -600,14 +600,14 @@ const ViewParent = () => {
       ====================================================== */}
       <div className="flex flex-wrap justify-end gap-3 mt-6">
         <Link
-          to="/parents"
+          to="/school-admin/parents"
           className="btn btn-outline"
         >
           Back to Parents
         </Link>
 
         <Link
-          to={`/parents/${parentId}/edit`}
+          to={`/school-admin/parents/${parentId}/edit`}
           className="btn btn-warning"
         >
           Edit Parent

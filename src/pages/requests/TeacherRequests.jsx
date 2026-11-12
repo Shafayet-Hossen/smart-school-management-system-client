@@ -40,7 +40,7 @@ function TeacherRequests() {
                     "/school-admin/requests/teachers"
                 );
             
-            console.log("TeacherRequests:",response.data.data)
+            // console.log("TeacherRequests:",response.data.data)
 
             if (response.data.success) {
 
@@ -101,7 +101,7 @@ function TeacherRequests() {
     ) => {
 
         try {
-            console.log("requestId:",requestId)
+            // console.log("requestId:",requestId)
             setActionLoading(requestId);
 
             setError("");
@@ -273,7 +273,7 @@ function TeacherRequests() {
                 HEADER
             ========================================================= */}
 
-            <header className="sticky top-0 z-30 border-b border-base-300 bg-base-100">
+            {/* <header className="sticky top-0 z-30 border-b border-base-300 bg-base-100">
 
                 <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
 
@@ -302,7 +302,7 @@ function TeacherRequests() {
 
                 </div>
 
-            </header>
+            </header> */}
 
 
             {/* =========================================================

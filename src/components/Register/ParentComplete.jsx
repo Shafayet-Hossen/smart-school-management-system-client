@@ -19,28 +19,22 @@ function ParentComplete() {
         registrationData,
         updateField,
     } = useRegistration();
-    // console.log("RegistrationData: ",registrationData)
-    
+
     const [status, setStatus] = useState("processing");
 
     const [error, setError] = useState("");
 
     const registrationStartedRef = useRef(false);
 
-    /*
-    |--------------------------------------------------------------------------
-    | Complete Teacher Registration
-    |--------------------------------------------------------------------------
-    */
-    console.log("registrationData: ", registrationData);
+    // console.log("registrationData: ", registrationData);
 
     const completeRegistration = async () => {
 
         // setLoading(true);
         setError("");
         // registrationStartedRef.current = false;
+        setStatus("processing");
         try {
-            setStatus("processing");
 
             const currentUser = auth.currentUser;
 
@@ -97,73 +91,127 @@ function ParentComplete() {
                 );
             }
 
+            // if (
+            //     !registrationData.student_roll ||
+            //     !registrationData.last_name
+            // ) {
+            //     throw new Error(
+            //         "Personal information is incomplete."
+            //     );
+            // }
             if (
-                !registrationData.student_id ||
-                !registrationData.last_name
+                registrationData.email &&
+                registrationData.email.toLowerCase() !==
+                currentUser.email.toLowerCase()
             ) {
                 throw new Error(
-                    "Personal information is incomplete."
+                    "The registration email does not match your authenticated account."
                 );
             }
+
+            if (
+                !Array.isArray(registrationData.children) ||
+                registrationData.children.length === 0
+            ) {
+                throw new Error(
+                    "Please add and verify at least one child before continuing."
+                );
+            }
+
+            // --------------------------------------------------
+            // Validate and normalize children
+            // --------------------------------------------------
+
+            const children = registrationData.children.map(
+                (child, index) => {
+                    if (
+                        !child.class_id ||
+                        !child.section_id ||
+                        !String(child.student_roll ?? "").trim()
+                    ) {
+                        throw new Error(
+                            `Child ${index + 1}: class, section, and roll number are required.`
+                        );
+                    }
+
+                    const studentId =
+                        child.student_id ||
+                        child.child_student_id ||
+                        child.student?._id ||
+                        child.student?.student_id ||
+                        "";
+
+                    if (!studentId) {
+                        throw new Error(
+                            `Child ${index + 1}: please find and verify the student first.`
+                        );
+                    }
+
+                    return {
+                        student_id: String(studentId),
+                        student_roll: String(child.student_roll).trim(),
+
+                        class_id: child.class_id,
+                        class_name: child.class_name || "",
+
+                        section_id: child.section_id,
+                        section_name: child.section_name || "",
+                    };
+                }
+            );
+            // Prevent the same student from being added more than once.
+            const studentIds = children.map((child) => child.student_id);
+
+            if (new Set(studentIds).size !== studentIds.length) {
+                throw new Error(
+                    "The same student has been added more than once."
+                );
+            }
+
 
 
             const payload = {
                 role: "parent",
 
-                roll_number: registrationData.roll_number||null,
-                
-                first_name:
-                    registrationData.first_name,
+                // Parent account information
+                first_name: registrationData.first_name.trim(),
+                last_name: registrationData.last_name.trim(),
+                email: currentUser.email,
+                firebase_uid: currentUser.uid,
 
-                last_name:
-                    registrationData.last_name,
+                phone: registrationData.phone || null,
+                gender: registrationData.gender || null,
+                date_of_birth: registrationData.date_of_birth || null,
 
-                phone:
-                    registrationData.phone || null,
+                // Parent address information
+                address: registrationData.address || null,
+                division: registrationData.division || null,
+                district: registrationData.district || null,
+                upazila: registrationData.upazila || null,
 
-                gender:
-                    registrationData.gender || null,
+                // Selected school
+                school_id: registrationData.school_id,
+                school_name: registrationData.school_name || "",
+                eiin: registrationData.eiin || "",
 
-                date_of_birth:
-                    registrationData.date_of_birth ||
-                    null,
+                school_code: registrationData.school_code || "",
+                school_email: registrationData.school_email || "",
+                school_phone: registrationData.school_phone || "",
+                school_type: registrationData.school_type || "",
+                website: registrationData.website || "",
 
-                school_id:
-                    registrationData.school_id,
+                // Parent-child relationship information
+                relationship: registrationData.relationship || "",
 
-                school_name:
-                    registrationData.school_name || "",  
-
-                class_code:
-                    registrationData.class_code,
-
-                class_name:
-                    registrationData.class_name || "",
-
-                section_id:
-                    registrationData.section_id,
-
-                section_name:
-                    registrationData.section_name || "",
-                
-                student_id:
-                    registrationData.student_id || "",
-
-                address:
-                    registrationData.address || null,
-
-                city:
-                    registrationData.city || null,
-
-                country:
-                    registrationData.country ||
-                    "Bangladesh",
+                // All verified children
+                children,
             };
 
-            console.log(
-                "Teacher registration payload:",
-                payload
-            );
+
+            // console.log(
+            //     "Teacher registration payload:",
+            //     payload
+            // );
 
             /*
             |--------------------------------------------------------------------------
@@ -184,10 +232,10 @@ function ParentComplete() {
             );
 
 
-            console.log(
-                "Parent registration response:",
-                response.data
-            );
+            // console.log(
+            //     "Parent registration response:",
+            //     response.data
+            // );
 
             /*
             |--------------------------------------------------------------------------
@@ -295,10 +343,14 @@ function ParentComplete() {
     |--------------------------------------------------------------------------
     */
 
+    // const handleLogin = () => {
+    //     navigate("/login", {
+    //         replace: true,
+    //     });
+    // };
+    
     const handleLogin = () => {
-        navigate("/login", {
-            replace: true,
-        });
+        window.location.href = "/login";
     };
 
     /*
@@ -439,7 +491,7 @@ function ParentComplete() {
                     </h1>
 
                     <p className="mt-4 text-sm leading-6 text-base-content/60">
-                        Your teacher account has been
+                        Your Parent account has been
                         successfully created.
                     </p>
 

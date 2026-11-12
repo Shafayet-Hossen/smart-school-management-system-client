@@ -49,6 +49,8 @@ function RoleSelection() {
     const handleContinue = () => {
         if (!selectedRole) return;
 
+        // console.log("Registration Data:", registrationData);
+
         const route = ROLE_ROUTES[selectedRole];
 
         if (!route) {

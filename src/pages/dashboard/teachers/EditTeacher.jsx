@@ -322,10 +322,10 @@ function EditTeacher() {
                     formData
                 );
 
-            console.log(
-                "Update teacher response:",
-                response.data
-            );
+            // console.log(
+            //     "Update teacher response:",
+            //     response.data
+            // );
             if (!response.data.success) {
 
                 setError(
@@ -388,7 +388,7 @@ function EditTeacher() {
     const handleCancel = () => {
 
         navigate(
-            `/teachers/${teacherId}`
+            `/school-admin/teachers/${teacherId}`
         );
 
     };

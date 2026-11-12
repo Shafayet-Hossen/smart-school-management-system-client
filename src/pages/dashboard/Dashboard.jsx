@@ -26,7 +26,7 @@ function Dashboard() {
         loading,
     } = useAuth();
 
-    console.log("user:",user)
+    // console.log("user:",user)
 
     /*
     |--------------------------------------------------------------------------

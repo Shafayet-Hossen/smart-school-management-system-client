@@ -56,6 +56,8 @@ const Parents = () => {
         }
       );
 
+      // console.log("Parents: ",response.data.data)
+      
       setParents(
         response.data?.data || []
       );
@@ -67,7 +69,7 @@ const Parents = () => {
 
       setError(
         error.response?.data?.message ||
-          "Failed to load parents."
+        "Failed to load parents."
       );
     } finally {
       setLoading(false);
@@ -124,9 +126,8 @@ const Parents = () => {
     }
 
     const fullName =
-      `${parent.first_name || ""} ${
-        parent.last_name || ""
-      }`.trim();
+      `${parent.first_name || ""} ${parent.last_name || ""
+        }`.trim();
 
     const confirmed = window.confirm(
       `Are you sure you want to delete ${fullName}?`
@@ -163,7 +164,7 @@ const Parents = () => {
 
       setError(
         error.response?.data?.message ||
-          "Failed to delete parent."
+        "Failed to delete parent."
       );
     } finally {
       setDeletingId(null);
@@ -176,9 +177,8 @@ const Parents = () => {
    */
   const getParentName = (parent) => {
     return (
-      `${parent.first_name || ""} ${
-        parent.last_name || ""
-      }`.trim() || "Unnamed Parent"
+      `${parent.first_name || ""} ${parent.last_name || ""
+        }`.trim() || "Unnamed Parent"
     );
   };
 
@@ -234,7 +234,7 @@ const Parents = () => {
   const getRegistrationBadge = (
     value
   ) => {
-    if (value === "registered") {
+    if (value) {
       return (
         <span className="badge badge-success badge-sm">
           Registered
@@ -249,473 +249,485 @@ const Parents = () => {
     );
   };
 
+  // const handleBack = () => {
+
+  //   navigate("/dashboard");
+
+  // };
+
 
   return (
-    <div className="p-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">
-            Parents
-          </h1>
-
-          <p className="text-base-content/60 mt-1">
-            Manage parents and their associated
-            students.
-          </p>
-        </div>
-
-        <Link
-          to="/parents/add"
-          className="btn btn-primary"
-        >
-          + Add Parent
-        </Link>
-      </div>
-
-
-      {/* Success */}
-      {success && (
-        <div className="alert alert-success mb-5">
-          <span>{success}</span>
+    <div className="min-h-screen bg-base-200">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        {/* <div>
 
           <button
-            type="button"
-            className="btn btn-ghost btn-xs"
-            onClick={() => setSuccess("")}
+            onClick={handleBack}
+            className="text-sm font-medium text-base-content/50 hover:text-primary hover:cursor-pointer"
           >
-            ✕
+            ← Dashboard
           </button>
-        </div>
-      )}
 
+        </div> */}
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+          <div>
+            <h1 className="text-2xl font-bold">
+              Parents
+            </h1>
 
-      {/* Error */}
-      {error && (
-        <div className="alert alert-error mb-5">
-          <span>{error}</span>
+            <p className="text-base-content/60 mt-1">
+              Manage parents and their associated
+              students.
+            </p>
+          </div>
 
-          <button
-            type="button"
-            className="btn btn-ghost btn-xs"
-            onClick={() => setError("")}
+          <Link
+            to="/school-admin/add-parents"
+            className="btn btn-primary"
           >
-            ✕
-          </button>
+            + Add Parent
+          </Link>
         </div>
-      )}
 
 
-      {/* Filters */}
-      <div className="card bg-base-100 shadow-sm border border-base-300 mb-6">
-        <div className="card-body">
-          <form
-            onSubmit={handleSearch}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4"
-          >
-            {/* Search */}
-            <div className="lg:col-span-2">
-              <label className="label">
-                <span className="label-text">
-                  Search Parent
-                </span>
-              </label>
+        {/* Success */}
+        {success && (
+          <div className="alert alert-success mb-5">
+            <span>{success}</span>
 
-              <input
-                type="text"
-                value={search}
-                onChange={(e) =>
-                  setSearch(e.target.value)
-                }
-                placeholder="Name, phone or email"
-                className="input input-bordered w-full"
-              />
-            </div>
+            <button
+              type="button"
+              className="btn btn-ghost btn-xs"
+              onClick={() => setSuccess("")}
+            >
+              ✕
+            </button>
+          </div>
+        )}
 
 
-            {/* Relationship */}
-            <div>
-              <label className="label">
-                <span className="label-text">
-                  Relationship
-                </span>
-              </label>
+        {/* Error */}
+        {error && (
+          <div className="alert alert-error mb-5">
+            <span>{error}</span>
 
-              <select
-                value={relationship}
-                onChange={(e) =>
-                  setRelationship(
-                    e.target.value
-                  )
-                }
-                className="select select-bordered w-full"
-              >
-                <option value="">
-                  All
-                </option>
-
-                <option value="father">
-                  Father
-                </option>
-
-                <option value="mother">
-                  Mother
-                </option>
-
-                <option value="guardian">
-                  Guardian
-                </option>
-
-                <option value="brother">
-                  Brother
-                </option>
-
-                <option value="sister">
-                  Sister
-                </option>
-
-                <option value="other">
-                  Other
-                </option>
-              </select>
-            </div>
+            <button
+              type="button"
+              className="btn btn-ghost btn-xs"
+              onClick={() => setError("")}
+            >
+              ✕
+            </button>
+          </div>
+        )}
 
 
-            {/* Status */}
-            <div>
-              <label className="label">
-                <span className="label-text">
-                  Status
-                </span>
-              </label>
+        {/* Filters */}
+        <div className="card bg-base-100 shadow-sm border border-base-300 mb-6">
+          <div className="card-body">
+            <form
+              onSubmit={handleSearch}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4"
+            >
+              {/* Search */}
+              <div className="lg:col-span-2">
+                <label className="label">
+                  <span className="label-text">
+                    Search Parent
+                  </span>
+                </label>
 
-              <select
-                value={status}
-                onChange={(e) =>
-                  setStatus(
-                    e.target.value
-                  )
-                }
-                className="select select-bordered w-full"
-              >
-                <option value="">
-                  All
-                </option>
-
-                <option value="active">
-                  Active
-                </option>
-
-                <option value="inactive">
-                  Inactive
-                </option>
-              </select>
-            </div>
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) =>
+                    setSearch(e.target.value)
+                  }
+                  placeholder="Name, phone or email"
+                  className="input input-bordered w-full"
+                />
+              </div>
 
 
-            {/* Registration status */}
-            <div>
-              <label className="label">
-                <span className="label-text">
-                  Registration
-                </span>
-              </label>
+              {/* Relationship */}
+              <div>
+                <label className="label">
+                  <span className="label-text">
+                    Relationship
+                  </span>
+                </label>
 
-              <select
-                value={registrationStatus}
-                onChange={(e) =>
-                  setRegistrationStatus(
-                    e.target.value
-                  )
-                }
-                className="select select-bordered w-full"
-              >
-                <option value="">
-                  All
-                </option>
+                <select
+                  value={relationship}
+                  onChange={(e) =>
+                    setRelationship(
+                      e.target.value
+                    )
+                  }
+                  className="select select-bordered w-full"
+                >
+                  <option value="">
+                    All
+                  </option>
 
-                <option value="registered">
-                  Registered
-                </option>
+                  <option value="father">
+                    Father
+                  </option>
 
-                <option value="not_registered">
-                  Not Registered
-                </option>
-              </select>
-            </div>
+                  <option value="mother">
+                    Mother
+                  </option>
+
+                  <option value="guardian">
+                    Guardian
+                  </option>
+
+                  <option value="brother">
+                    Brother
+                  </option>
+
+                  <option value="sister">
+                    Sister
+                  </option>
+
+                  <option value="other">
+                    Other
+                  </option>
+                </select>
+              </div>
 
 
-            {/* Buttons */}
-            <div className="md:col-span-2 lg:col-span-5 flex flex-wrap gap-2">
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={loading}
-              >
-                Search
-              </button>
+              {/* Status */}
+              <div>
+                <label className="label">
+                  <span className="label-text">
+                    Status
+                  </span>
+                </label>
 
-              <button
-                type="button"
-                onClick={handleClearFilters}
-                className="btn btn-outline"
-              >
-                Clear
-              </button>
-            </div>
-          </form>
+                <select
+                  value={status}
+                  onChange={(e) =>
+                    setStatus(
+                      e.target.value
+                    )
+                  }
+                  className="select select-bordered w-full"
+                >
+                  <option value="">
+                    All
+                  </option>
+
+                  <option value="active">
+                    Active
+                  </option>
+
+                  <option value="inactive">
+                    Inactive
+                  </option>
+                </select>
+              </div>
+
+
+              {/* Registration status */}
+              <div>
+                <label className="label">
+                  <span className="label-text">
+                    Registration
+                  </span>
+                </label>
+
+                <select
+                  value={registrationStatus}
+                  onChange={(e) =>
+                    setRegistrationStatus(
+                      e.target.value
+                    )
+                  }
+                  className="select select-bordered w-full"
+                >
+                  <option value="">
+                    All
+                  </option>
+
+                  <option value="registered">
+                    Registered
+                  </option>
+
+                  <option value="not_registered">
+                    Not Registered
+                  </option>
+                </select>
+              </div>
+
+
+              {/* Buttons */}
+              <div className="md:col-span-2 lg:col-span-5 flex flex-wrap gap-2">
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={loading}
+                >
+                  Search
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleClearFilters}
+                  className="btn btn-outline"
+                >
+                  Clear
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
 
 
-      {/* Parent count */}
-      <div className="mb-3">
-        <span className="text-sm text-base-content/60">
-          Total Parents:{" "}
-          <strong>
-            {parents.length}
-          </strong>
-        </span>
-      </div>
+        {/* Parent count */}
+        <div className="mb-3">
+          <span className="text-sm text-base-content/60">
+            Total Parents:{" "}
+            <strong>
+              {parents.length}
+            </strong>
+          </span>
+        </div>
 
 
-      {/* Table */}
-      <div className="card bg-base-100 shadow-sm border border-base-300">
-        <div className="card-body p-0">
-          <div className="overflow-x-auto">
-            <table className="table table-zebra">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Parent</th>
-                  <th>Contact</th>
-                  <th>Relationship</th>
-                  <th>Students</th>
-                  <th>Status</th>
-                  <th>Registration</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {loading ? (
+        {/* Table */}
+        <div className="card bg-base-100 shadow-sm border border-base-300">
+          <div className="card-body p-0">
+            <div className="overflow-x-auto">
+              <table className="table table-zebra">
+                <thead>
                   <tr>
-                    <td
-                      colSpan="8"
-                      className="text-center py-10"
-                    >
-                      <span className="loading loading-spinner loading-md"></span>
-
-                      <div className="mt-2 text-sm text-base-content/60">
-                        Loading parents...
-                      </div>
-                    </td>
+                    <th>#</th>
+                    <th>Parent</th>
+                    <th>Contact</th>
+                    <th>Relationship</th>
+                    <th>Students</th>
+                    <th>Status</th>
+                    <th>Registration</th>
+                    <th>Actions</th>
                   </tr>
-                ) : parents.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan="8"
-                      className="text-center py-10"
-                    >
-                      <div className="text-lg font-medium">
-                        No parents found
-                      </div>
+                </thead>
 
-                      <div className="text-sm text-base-content/60 mt-1">
-                        Try changing your
-                        search or filters.
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  parents.map(
-                    (parent, index) => (
-                      <tr
-                        key={parent._id}
+                <tbody>
+                  {loading ? (
+                    <tr>
+                      <td
+                        colSpan="8"
+                        className="text-center py-10"
                       >
-                        {/* Number */}
-                        <td>
-                          {index + 1}
-                        </td>
+                        <span className="loading loading-spinner loading-md"></span>
+
+                        <div className="mt-2 text-sm text-base-content/60">
+                          Loading parents...
+                        </div>
+                      </td>
+                    </tr>
+                  ) : parents.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan="8"
+                        className="text-center py-10"
+                      >
+                        <div className="text-lg font-medium">
+                          No parents found
+                        </div>
+
+                        <div className="text-sm text-base-content/60 mt-1">
+                          Try changing your
+                          search or filters.
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    parents.map(
+                      (parent, index) => (
+                        <tr
+                          key={parent._id}
+                        >
+                          {/* Number */}
+                          <td>
+                            {index + 1}
+                          </td>
 
 
-                        {/* Parent */}
-                        <td>
-                          <div className="font-semibold">
-                            {getParentName(
-                              parent
-                            )}
-                          </div>
-
-                          {parent.occupation && (
-                            <div className="text-xs text-base-content/60">
-                              {
-                                parent.occupation
-                              }
+                          {/* Parent */}
+                          <td>
+                            <div className="font-semibold">
+                              {getParentName(
+                                parent
+                              )}
                             </div>
-                          )}
-                        </td>
 
-
-                        {/* Contact */}
-                        <td>
-                          <div>
-                            {parent.phone ||
-                              "-"}
-                          </div>
-
-                          {parent.email && (
-                            <div className="text-xs text-base-content/60">
-                              {
-                                parent.email
-                              }
-                            </div>
-                          )}
-                        </td>
-
-
-                        {/* Relationship */}
-                        <td>
-                          <span className="badge badge-outline">
-                            {getRelationshipLabel(
-                              parent.relationship
+                            {parent.occupation && (
+                              <div className="text-xs text-base-content/60">
+                                {
+                                  parent.occupation
+                                }
+                              </div>
                             )}
-                          </span>
-                        </td>
+                          </td>
 
 
-                        {/* Students */}
-                        <td>
-                          {parent.students?.length >
-                          0 ? (
-                            <div className="space-y-1">
-                              {parent.students
-                                .slice(0, 3)
-                                .map(
-                                  (
-                                    student
-                                  ) => (
-                                    <div
-                                      key={
-                                        student._id
-                                      }
-                                      className="text-sm"
-                                    >
-                                      <div className="font-medium">
-                                        {student.first_name ||
-                                          ""}{" "}
-                                        {student.last_name ||
-                                          ""}
-                                      </div>
+                          {/* Contact */}
+                          <td>
+                            <div>
+                              {parent.phone ||
+                                "-"}
+                            </div>
 
-                                      <div className="text-xs text-base-content/60">
-                                        {
+                            {parent.email && (
+                              <div className="text-xs text-base-content/60">
+                                {
+                                  parent.email
+                                }
+                              </div>
+                            )}
+                          </td>
+
+
+                          {/* Relationship */}
+                          <td>
+                            <span className="badge badge-outline">
+                              {getRelationshipLabel(
+                                parent.relationship
+                              )}
+                            </span>
+                          </td>
+
+
+                          {/* Students */}
+                          <td>
+                            <span>
+                              Children:
+                              {' '} 
+                              {
+                              parent.children?.length
+                              }</span>
+                            {parent.children?.length >
+                              0 ? (
+                              
+                              <div className="space-y-1">
+                                {parent.children
+                                  .map(
+                                    (
+                                      student
+                                    ) => (
+                                      <div
+                                        key={
                                           student.student_id
                                         }
+                                        className="text-sm"
+                                      >
 
-                                        {student.class_name &&
-                                          ` • ${student.class_name}`}
+                                        <div className="text-xs text-base-content/60">
+                                          {/* {
+                                            student.student_id
+                                          } */}
 
-                                        {student.section_name &&
-                                          ` • ${student.section_name}`}
+                                          {student.class_name &&
+                                            ` • ${student.class_name}`}
+
+                                          {student.section_name &&
+                                            ` Section: ${student.section_name}`}
+
+                                    
+                                              
+                                            {student.student_roll &&
+                                            ` Roll: ${student.student_roll}`}
+                                        
+                                        </div>
                                       </div>
-                                    </div>
+                                    )
+                                  )}
+                              </div>
+                            ) : (
+                              <span className="text-base-content/50">
+                                No students
+                              </span>
+                            )}
+                          </td>
+
+
+                          {/* Status */}
+                          <td>
+                            {getStatusBadge(
+                              parent.status
+                            )}
+                          </td>
+
+
+                          {/* Registration */}
+                          <td>
+                            {getRegistrationBadge(
+                              parent.firebase_uid
+                            )}
+                          </td>
+
+
+                          {/* Actions */}
+                          <td>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-info btn-outline"
+                                onClick={() =>
+                                  navigate(
+                                    `/school-admin/parents/${parent._id}`
                                   )
-                                )}
+                                }
+                              >
+                                View
+                              </button>
 
-                              {parent.students
-                                .length >
-                                3 && (
-                                <div className="text-xs text-primary">
-                                  +
-                                  {parent.students
-                                    .length -
-                                    3}{" "}
-                                  more
-                                </div>
-                              )}
-                            </div>
-                          ) : (
-                            <span className="text-base-content/50">
-                              No students
-                            </span>
-                          )}
-                        </td>
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-warning btn-outline"
+                                onClick={() =>
+                                  navigate(
+                                    `/school-admin/parents/${parent._id}/edit`
+                                  )
+                                }
+                              >
+                                Edit
+                              </button>
 
-
-                        {/* Status */}
-                        <td>
-                          {getStatusBadge(
-                            parent.status
-                          )}
-                        </td>
-
-
-                        {/* Registration */}
-                        <td>
-                          {getRegistrationBadge(
-                            parent.registration_status
-                          )}
-                        </td>
-
-
-                        {/* Actions */}
-                        <td>
-                          <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              className="btn btn-sm btn-info btn-outline"
-                              onClick={() =>
-                                navigate(
-                                  `/parents/${parent._id}`
-                                )
-                              }
-                            >
-                              View
-                            </button>
-
-                            <button
-                              type="button"
-                              className="btn btn-sm btn-warning btn-outline"
-                              onClick={() =>
-                                navigate(
-                                  `/parents/${parent._id}/edit`
-                                )
-                              }
-                            >
-                              Edit
-                            </button>
-
-                            <button
-                              type="button"
-                              className="btn btn-sm btn-error btn-outline"
-                              disabled={
-                                deletingId ===
-                                parent._id ||
-                                parent.registration_status ===
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-error btn-outline"
+                                disabled={
+                                  deletingId ===
+                                  parent._id ||
+                                  parent.registration_status ===
                                   "registered"
-                              }
-                              onClick={() =>
-                                handleDelete(
-                                  parent
-                                )
-                              }
-                            >
-                              {deletingId ===
-                              parent._id ? (
-                                <span className="loading loading-spinner loading-xs"></span>
-                              ) : (
-                                "Delete"
-                              )}
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
+                                }
+                                onClick={() =>
+                                  handleDelete(
+                                    parent
+                                  )
+                                }
+                              >
+                                {deletingId ===
+                                  parent._id ? (
+                                  <span className="loading loading-spinner loading-xs"></span>
+                                ) : (
+                                  "Delete"
+                                )}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      )
                     )
-                  )
-                )}
-              </tbody>
-            </table>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

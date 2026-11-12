@@ -1,449 +1,604 @@
-import { useEffect, useState } from "react";
-import api from "../../services/api.js";
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getTeacherStudents } from "../../services/teacherStudentService.js";
+import { useNavigate } from "react-router-dom";
 
 const MyStudents = () => {
-  const [students, setStudents] = useState([]);
-  const [total, setTotal] = useState(0);
-
-  const [search, setSearch] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedClass, setSelectedClass] = useState("");
   const [selectedSection, setSelectedSection] = useState("");
+  const navigate = useNavigate();
+  // -----------------------------------------
+  // Fetch teacher students
+  // -----------------------------------------
+  const {
+    data: students = [],
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["teacher-students"],
+    queryFn: getTeacherStudents,
+  });
 
-  const [classes, setClasses] = useState([]);
-  const [sections, setSections] = useState([]);
+  // console.log("Students: ", students)
 
-  const [loading, setLoading] = useState(true);
-  const [filterLoading, setFilterLoading] = useState(false);
-  const [error, setError] = useState("");
+  // -----------------------------------------
+  // Get unique classes
+  // -----------------------------------------
+  const classes = useMemo(() => {
+    const classMap = new Map();
 
-  /*
-   * Fetch teacher's students
-   */
-  const fetchStudents = async () => {
-    try {
-      setFilterLoading(true);
-      setError("");
-
-      const params = {};
-
-      if (search.trim()) {
-        params.search = search.trim();
-      }
-
-      if (selectedClass) {
-        params.class_id = selectedClass;
-      }
-
-      if (selectedSection) {
-        params.section_id = selectedSection;
-      }
-
-      const response = await api.get("/teachers/students", {
-        params,
-      });
-      console.log("Teacher students response:", response.data.data);
-      if (response.data.success) {
-        setStudents(response.data.data || []);
-        setTotal(response.data.total || 0);
-      } else {
-        setError(
-          response.data.message ||
-            "Failed to load students."
+    students.forEach((student) => {
+      if (student.class_code) {
+        classMap.set(
+          student.class_code,
+          student.class_name
         );
       }
-    } catch (err) {
-      console.error(
-        "Failed to load teacher students:",
-        err
-      );
+    });
 
-      setError(
-        err.response?.data?.message ||
-          "Failed to load students."
-      );
-    } finally {
-      setLoading(false);
-      setFilterLoading(false);
-    }
-  };
-
-  /*
-   * Initial student loading
-   */
-  useEffect(() => {
-    fetchStudents();
-  }, []);
-
-  /*
-   * Fetch teacher classes for filtering.
-   *
-   * We use the same endpoint that powers /my-classes.
-   */
-  useEffect(() => {
-    const fetchClasses = async () => {
-      try {
-        const response = await api.get(
-          "/teachers/classes"
-        );
-
-        if (response.data.success) {
-          setClasses(response.data.data || []);
-        }
-      } catch (err) {
-        console.error(
-          "Failed to load teacher classes:",
-          err
-        );
-      }
-    };
-
-    fetchClasses();
-  }, []);
-
-  /*
-   * Update sections when class changes.
-   */
-  useEffect(() => {
-    if (!selectedClass) {
-      setSections([]);
-      setSelectedSection("");
-      return;
-    }
-
-    const selected = classes.find(
-      (item) => item._id === selectedClass
+    return Array.from(classMap.entries()).map(
+      ([id, name]) => ({
+        id,
+        name,
+      })
     );
+  }, [students]);
 
-    setSections(selected?.sections || []);
-    setSelectedSection("");
-  }, [selectedClass, classes]);
+  // -----------------------------------------
+  // Get sections based on selected class
+  // -----------------------------------------
+  const sections = useMemo(() => {
+    const sectionMap = new Map();
 
-  /*
-   * Search with Enter.
-   */
-  const handleSearchKeyDown = (event) => {
-    if (event.key === "Enter") {
-      fetchStudents();
-    }
-  };
+    students
+      .filter((student) => {
+        if (!selectedClass) {
+          return true;
+        }
 
-  /*
-   * Clear all filters.
-   */
-  const clearFilters = () => {
-    setSearch("");
+        return (
+          String(student.class_code) ===
+          String(selectedClass)
+        );
+      })
+      .forEach((student) => {
+        if (student.section_id) {
+          sectionMap.set(
+            student.section_id,
+            student.section_name
+          );
+        }
+      });
+
+    return Array.from(sectionMap.entries()).map(
+      ([id, name]) => ({
+        id,
+        name,
+      })
+    );
+  }, [students, selectedClass]);
+
+  // -----------------------------------------
+  // Filter students
+  // -----------------------------------------
+  const filteredStudents = useMemo(() => {
+    const search = searchTerm
+      .trim()
+      .toLowerCase();
+
+    return students.filter((student) => {
+      // Class filter
+      if (
+        selectedClass &&
+        String(student.class_code) !==
+        String(selectedClass)
+      ) {
+        return false;
+      }
+
+      // Section filter
+      if (
+        selectedSection &&
+        String(student.section_id) !==
+        String(selectedSection)
+      ) {
+        return false;
+      }
+
+      // Search
+      if (search) {
+        const fullName =
+          `${student.first_name || ""} ${student.last_name || ""
+            }`.toLowerCase();
+
+        const studentId =
+          String(student.student_id || "").toLowerCase();
+
+        const rollNumber =
+          String(student.roll_number || "").toLowerCase();
+
+        const email =
+          String(student.email || "").toLowerCase();
+
+        const phone =
+          String(student.phone || "").toLowerCase();
+
+        const matchesSearch =
+          fullName.includes(search) ||
+          studentId.includes(search) ||
+          rollNumber.includes(search) ||
+          email.includes(search) ||
+          phone.includes(search);
+
+        if (!matchesSearch) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [
+    students,
+    searchTerm,
+    selectedClass,
+    selectedSection,
+  ]);
+
+  // -----------------------------------------
+  // Clear filters
+  // -----------------------------------------
+  const handleClearFilters = () => {
+    setSearchTerm("");
     setSelectedClass("");
     setSelectedSection("");
-
-    setTimeout(() => {
-      fetchStudents();
-    }, 0);
   };
 
-  if (loading) {
+  // -----------------------------------------
+  // Class changed
+  // -----------------------------------------
+  const handleClassChange = (event) => {
+    setSelectedClass(event.target.value);
+
+    // Reset section when class changes
+    setSelectedSection("");
+  };
+
+  // -----------------------------------------
+  // Loading
+  // -----------------------------------------
+  if (isLoading) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center">
-        <span className="loading loading-spinner loading-lg"></span>
+      <div className="p-6">
+        <div className="flex justify-center items-center min-h-64">
+          <span className="loading loading-spinner loading-lg"></span>
+        </div>
       </div>
     );
   }
 
+  // -----------------------------------------
+  // Error
+  // -----------------------------------------
+  if (isError) {
+    return (
+      <div className="p-6">
+        <div className="alert alert-error">
+          <span>
+            {error?.response?.data?.message ||
+              "Failed to load students."}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  const handleBack = () => {
+
+    navigate("/dashboard");
+
+  };
+
   return (
     <div className="p-6">
-      {/* Header */}
-      <div className="mb-8">
+      <div>
+        <button
+          onClick={handleBack}
+          className="text-sm font-medium text-base-content/50 hover:text-primary hover:cursor-pointer"
+        >
+          ← Dashboard
+        </button>
+
+      </div>
+      {/* ===================================== */}
+      {/* PAGE HEADER */}
+      {/* ===================================== */}
+
+      <div className="mb-6">
         <h1 className="text-3xl font-bold">
           My Students
         </h1>
 
-        <p className="mt-1 text-base-content/60">
+        <p className="text-base-content/70 mt-1">
           View and manage students from your assigned
-          classes.
+          classes and sections.
         </p>
       </div>
 
-      {/* Error */}
-      {error && (
-        <div className="alert alert-error mb-6">
-          <span>{error}</span>
-        </div>
-      )}
+      {/* ===================================== */}
+      {/* SUMMARY CARDS */}
+      {/* ===================================== */}
 
-      {/* Statistics */}
-      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="stat rounded-xl border border-base-300 bg-base-100 shadow-sm">
-          <div className="stat-title">
-            Total Students
-          </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
 
-          <div className="stat-value text-primary">
-            {total}
-          </div>
+        {/* Total Students */}
+        <div className="card bg-base-100 shadow">
+          <div className="card-body">
+            <div className="flex items-center justify-between">
 
-          <div className="stat-desc">
-            Students in your assigned sections
-          </div>
-        </div>
+              <div>
+                <p className="text-sm text-base-content/60">
+                  Total Students
+                </p>
 
-        <div className="stat rounded-xl border border-base-300 bg-base-100 shadow-sm">
-          <div className="stat-title">
-            Classes
-          </div>
+                <p className="text-3xl font-bold mt-1">
+                  {students.length}
+                </p>
+              </div>
 
-          <div className="stat-value">
-            {classes.length}
-          </div>
+              <div className="text-4xl">
+                🎓
+              </div>
 
-          <div className="stat-desc">
-            Assigned classes
+            </div>
           </div>
         </div>
 
-        <div className="stat rounded-xl border border-base-300 bg-base-100 shadow-sm">
-          <div className="stat-title">
-            Sections
-          </div>
+        {/* Classes */}
+        <div className="card bg-base-100 shadow">
+          <div className="card-body">
+            <div className="flex items-center justify-between">
 
-          <div className="stat-value">
-            {classes.reduce(
-              (count, item) =>
-                count + (item.sections?.length || 0),
-              0
-            )}
-          </div>
+              <div>
+                <p className="text-sm text-base-content/60">
+                  Classes
+                </p>
 
-          <div className="stat-desc">
-            Assigned sections
+                <p className="text-3xl font-bold mt-1">
+                  {classes.length}
+                </p>
+              </div>
+
+              <div className="text-4xl">
+                🏫
+              </div>
+
+            </div>
           </div>
         </div>
+
+        {/* Sections */}
+        <div className="card bg-base-100 shadow">
+          <div className="card-body">
+            <div className="flex items-center justify-between">
+
+              <div>
+                <p className="text-sm text-base-content/60">
+                  Sections
+                </p>
+
+                <p className="text-3xl font-bold mt-1">
+                  {new Set(
+                    students
+                      .map(
+                        (student) =>
+                          student.section_id
+                      )
+                      .filter(Boolean)
+                  ).size}
+                </p>
+              </div>
+
+              <div className="text-4xl">
+                📚
+              </div>
+
+            </div>
+          </div>
+        </div>
+
       </div>
 
-      {/* Filters */}
-      <div className="mb-6 rounded-xl border border-base-300 bg-base-100 p-4 shadow-sm">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {/* Search */}
-          <div>
-            <label className="label">
-              <span className="label-text">
-                Search Student
-              </span>
-            </label>
+      {/* ===================================== */}
+      {/* FILTERS */}
+      {/* ===================================== */}
 
-            <input
-              type="text"
-              placeholder="Name, ID or email"
-              className="input input-bordered w-full"
-              value={search}
-              onChange={(event) =>
-                setSearch(event.target.value)
-              }
-              onKeyDown={handleSearchKeyDown}
-            />
-          </div>
+      <div className="card bg-base-100 shadow mb-6">
 
-          {/* Class */}
-          <div>
-            <label className="label">
-              <span className="label-text">
-                Class
-              </span>
-            </label>
+        <div className="card-body">
 
-            <select
-              className="select select-bordered w-full"
-              value={selectedClass}
-              onChange={(event) =>
-                setSelectedClass(event.target.value)
-              }
-            >
-              <option value="">
-                All Classes
-              </option>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 
-              {classes.map((item) => (
-                <option
-                  key={item._id}
-                  value={item._id}
-                >
-                  {item.name}
-                </option>
-              ))}
-            </select>
-          </div>
+            {/* Search */}
+            <div className="form-control md:col-span-2">
 
-          {/* Section */}
-          <div>
-            <label className="label">
-              <span className="label-text">
-                Section
-              </span>
-            </label>
+              <label className="label">
+                <span className="label-text">
+                  Search Students
+                </span>
+              </label>
 
-            <select
-              className="select select-bordered w-full"
-              value={selectedSection}
-              onChange={(event) =>
-                setSelectedSection(event.target.value)
-              }
-              disabled={!selectedClass}
-            >
-              <option value="">
-                All Sections
-              </option>
+              <input
+                type="text"
+                placeholder="Name, student ID, roll, email..."
+                value={searchTerm}
+                onChange={(event) =>
+                  setSearchTerm(event.target.value)
+                }
+                className="input input-bordered w-full"
+              />
 
-              {sections.map((section) => (
-                <option
-                  key={section._id}
-                  value={section._id}
-                >
-                  Section {section.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Buttons */}
-          <div className="flex items-end gap-2">
-            <button
-              type="button"
-              className="btn btn-primary flex-1"
-              onClick={fetchStudents}
-              disabled={filterLoading}
-            >
-              {filterLoading ? (
-                <span className="loading loading-spinner loading-sm"></span>
-              ) : (
-                "Search"
-              )}
-            </button>
-
-            <button
-              type="button"
-              className="btn btn-outline"
-              onClick={clearFilters}
-            >
-              Clear
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Student Table */}
-      <div className="overflow-x-auto rounded-xl border border-base-300 bg-base-100 shadow-sm">
-        {students.length === 0 ? (
-          <div className="py-16 text-center">
-            <div className="mb-4 text-5xl">
-              👨‍🎓
             </div>
 
-            <h2 className="text-xl font-semibold">
+            {/* Class */}
+            <div className="form-control">
+
+              <label className="label">
+                <span className="label-text">
+                  Class
+                </span>
+              </label>
+
+              <select
+                value={selectedClass}
+                onChange={handleClassChange}
+                className="select select-bordered w-full"
+              >
+                <option value="">
+                  All Classes
+                </option>
+
+                {classes.map((classItem) => (
+                  <option
+                    key={classItem.class_code}
+                    value={classItem.class_code}
+                  >
+                    {classItem.name}
+                  </option>
+                ))}
+              </select>
+
+            </div>
+
+            {/* Section */}
+            <div className="form-control">
+
+              <label className="label">
+                <span className="label-text">
+                  Section
+                </span>
+              </label>
+
+              <select
+                value={selectedSection}
+                onChange={(event) =>
+                  setSelectedSection(
+                    event.target.value
+                  )
+                }
+                className="select select-bordered w-full"
+              >
+                <option value="">
+                  All Sections
+                </option>
+
+                {sections.map((section) => (
+                  <option
+                    key={section.id}
+                    value={section.id}
+                  >
+                    {section.name}
+                  </option>
+                ))}
+              </select>
+
+            </div>
+
+          </div>
+
+          {/* Clear Filters */}
+          {(searchTerm ||
+            selectedClass ||
+            selectedSection) && (
+              <div className="flex justify-end mt-4">
+
+                <button
+                  type="button"
+                  onClick={handleClearFilters}
+                  className="btn btn-sm btn-ghost"
+                >
+                  Clear Filters
+                </button>
+
+              </div>
+            )}
+
+        </div>
+      </div>
+
+      {/* ===================================== */}
+      {/* RESULT COUNT */}
+      {/* ===================================== */}
+
+      <div className="flex justify-between items-center mb-3">
+
+        <h2 className="text-lg font-semibold">
+          Students
+        </h2>
+
+        <span className="badge badge-primary">
+          {filteredStudents.length} Students
+        </span>
+
+      </div>
+
+      {/* ===================================== */}
+      {/* EMPTY RESULT */}
+      {/* ===================================== */}
+
+      {filteredStudents.length === 0 ? (
+        <div className="card bg-base-100 shadow">
+
+          <div className="card-body items-center text-center">
+
+            <div className="text-5xl mb-3">
+              🎓
+            </div>
+
+            <h2 className="card-title">
               No Students Found
             </h2>
 
-            <p className="mt-2 text-base-content/60">
-              There are no students matching your current
-              filters.
+            <p className="text-base-content/70">
+              No students match your current search or
+              filter.
             </p>
+
+            {(searchTerm ||
+              selectedClass ||
+              selectedSection) && (
+                <button
+                  type="button"
+                  onClick={handleClearFilters}
+                  className="btn btn-primary btn-sm mt-3"
+                >
+                  Clear Filters
+                </button>
+              )}
+
           </div>
-        ) : (
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Student</th>
-                <th>Student ID</th>
-                <th>Class</th>
-                <th>Section</th>
-                <th>Roll</th>
-                <th>Guardian</th>
-                <th>Status</th>
-              </tr>
-            </thead>
+        </div>
+      ) : (
+        /* =================================== */
+        /* STUDENT TABLE */
+        /* =================================== */
 
-            <tbody>
-              {students.map((student) => (
-                <tr key={student.student_id}>
-                  {/* Student */}
-                  <td>
-                    <div className="flex items-center gap-3">
-                      <div className="avatar placeholder">
-                        <div className="w-10 rounded-full bg-primary text-primary-content">
-                          <span>
-                            {student.first_name
-                              ?.charAt(0)
-                              ?.toUpperCase()}
+        <div className="card bg-base-100 shadow">
+
+          <div className="card-body p-0">
+
+            <div className="overflow-x-auto">
+
+              <table className="table table-zebra">
+
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Student</th>
+                    <th>Student ID</th>
+                    <th>Roll</th>
+                    <th>Class</th>
+                    <th>Section</th>
+                    <th>Gender</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+
+                  {filteredStudents.map(
+                    (student, index) => (
+                      <tr key={student._id}>
+
+                        {/* Serial */}
+                        <td>
+                          {index + 1}
+                        </td>
+
+                        {/* Student */}
+                        <td>
+                          <div className="flex items-center gap-3">
+
+                            <div className="avatar placeholder">
+                              <div className="bg-neutral text-neutral-content rounded-full w-10">
+                                <span>
+                                  {student.first_name
+                                    ?.charAt(0)
+                                    ?.toUpperCase() ||
+                                    "S"}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div>
+                              <div className="font-semibold">
+                                {
+                                  student.first_name
+                                }{" "}
+                                {
+                                  student.last_name
+                                }
+                              </div>
+
+                              {student.email && (
+                                <div className="text-xs text-base-content/60">
+                                  {
+                                    student.email
+                                  }
+                                </div>
+                              )}
+                            </div>
+
+                          </div>
+                        </td>
+
+                        {/* Student ID */}
+                        <td>
+                          {student.student_id || "—"}
+                        </td>
+
+                        {/* Roll */}
+                        <td>
+                          {student.roll_number || "—"}
+                        </td>
+
+                        {/* Class */}
+                        <td>
+                          {student.class_name || "—"}
+                        </td>
+
+                        {/* Section */}
+                        <td>
+                          {student.section_name || "—"}
+                        </td>
+
+                        {/* Gender */}
+                        <td>
+                          {student.gender || "—"}
+                        </td>
+
+                        {/* Status */}
+                        <td>
+                          <span className="badge badge-success">
+                            {student.status || "active"}
                           </span>
-                        </div>
-                      </div>
+                        </td>
 
-                      <div>
-                        <div className="font-semibold">
-                          {student.first_name}{" "}
-                          {student.last_name}
-                        </div>
+                      </tr>
+                    )
+                  )}
 
-                        <div className="text-sm text-base-content/60">
-                          {student.email || "No email"}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
+                </tbody>
 
-                  {/* Student ID */}
-                  <td>
-                    <span className="font-medium">
-                      {student.student_id}
-                    </span>
-                  </td>
+              </table>
 
-                  {/* Class */}
-                  <td>
-                    {student.class_name || "-"}
-                  </td>
+            </div>
 
-                  {/* Section */}
-                  <td>
-                    {student.section_name || "-"}
-                  </td>
-
-                  {/* Roll */}
-                  <td>
-                    {student.roll_number || "-"}
-                  </td>
-
-                  {/* Guardian */}
-                  <td>
-                    <div>
-                      <div className="font-medium">
-                        {student.guardian_name || "-"}
-                      </div>
-
-                      {student.guardian_phone && (
-                        <div className="text-sm text-base-content/60">
-                          {student.guardian_phone}
-                        </div>
-                      )}
-                    </div>
-                  </td>
-
-                  {/* Status */}
-                  <td>
-                    <span className="badge badge-success">
-                      Active
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-
-      {/* Result count */}
-      {students.length > 0 && (
-        <div className="mt-4 text-sm text-base-content/60">
-          Showing {students.length} of {total} students
+          </div>
         </div>
       )}
+
     </div>
   );
 };

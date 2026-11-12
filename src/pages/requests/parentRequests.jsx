@@ -7,7 +7,7 @@ import { useAuth } from "../../context/AuthContext.jsx";
 
 function ParentRequests() {
 
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
 
     const { user } = useAuth();
 
@@ -40,7 +40,7 @@ function ParentRequests() {
                     "/school-admin/requests/parents"
                 );
             
-            console.log("ParentsRequests:",response.data.data)
+            // console.log("ParentsRequests:",response.data.data)
 
             if (response.data.success) {
 
@@ -101,7 +101,7 @@ function ParentRequests() {
     ) => {
 
         try {
-            console.log("requestId:",requestId)
+            // console.log("requestId:",requestId)
             setActionLoading(requestId);
 
             setError("");
@@ -230,11 +230,11 @@ function ParentRequests() {
     |--------------------------------------------------------------------------
     */
 
-    const handleBack = () => {
+    // const handleBack = () => {
 
-        navigate("/dashboard");
+    //     navigate("/dashboard");
 
-    };
+    // };
 
 
     /*
@@ -277,7 +277,7 @@ function ParentRequests() {
 
                 <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
 
-                    <div>
+                    {/* <div>
 
                         <button
                             onClick={handleBack}
@@ -286,7 +286,7 @@ function ParentRequests() {
                             ← Dashboard
                         </button>
 
-                    </div>
+                    </div> */}
 
 
                     <div>

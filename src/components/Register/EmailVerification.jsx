@@ -18,15 +18,12 @@ function EmailVerification() {
         updateField,
     } = useRegistration();
 
+    // console.log("registrationData in EmailVerification.jsx:", registrationData);
+
     const [resending, setResending] = useState(false);
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
-    
-    /*
-    |--------------------------------------------------------------------------
-    | Check whether email has been verified
-    |--------------------------------------------------------------------------
-    */
+
 
     const handleCheckVerification = async () => {
         setLoading(true);
@@ -51,6 +48,10 @@ function EmailVerification() {
                     "status",
                     "email_verified"
                 );
+                updateField(
+                    "email_verified",
+                    true
+                );
 
                 navigate(
                     "/register/school_admin/complete"
@@ -62,6 +63,11 @@ function EmailVerification() {
             setMessage(
                 "Your email has not been verified yet. Please check your inbox and click the verification link."
             );
+
+            // console.log(
+            //     "registrationData after update",
+            //     registrationData
+            // );
 
         } catch (err) {
             console.error(
@@ -194,7 +200,7 @@ function EmailVerification() {
                         <div className="h-2 flex-1 rounded-full bg-primary" />
 
                         <div className="h-2 flex-1 rounded-full bg-primary" />
-                        
+
                         <div className="h-2 flex-1 rounded-full bg-primary" />
 
                     </div>

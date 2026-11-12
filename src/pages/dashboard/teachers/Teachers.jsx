@@ -49,7 +49,7 @@ function Teachers() {
                         "/teachers"
                     );
 
-                console.log("Teachers response:", response.data);
+                // console.log("Teachers response:", response.data);
 
                 if (cancelled) {
                     return;
@@ -276,7 +276,7 @@ function Teachers() {
     ) => {
 
         navigate(
-            `/teachers/${teacher._id}`
+            `/school-admin/teachers/${teacher._id}`
         );
 
     };
@@ -293,7 +293,7 @@ function Teachers() {
     ) => {
 
         navigate(
-            `/teachers/${teacher._id}/edit`
+            `/school-admin/teachers/${teacher._id}/edit`
         );
 
     };
@@ -308,7 +308,7 @@ function Teachers() {
     const handleAddTeacher = () => {
 
         navigate(
-            "/teachers/add"
+            "/school-admin/add-teachers"
         );
 
     };
@@ -326,24 +326,26 @@ function Teachers() {
 
     };
 
-    const handleBack = () => {
+    // const handleBack = () => {
 
-        navigate("/dashboard");
+    //     navigate("/dashboard");
 
-    };
+    // };
 
 
 
     return (
 
         <div className="min-h-screen bg-base-200 p-4 sm:p-6 lg:p-8">
-            <button
-                type="button"
-                onClick={handleBack}
-                className="btn btn-ghost rounded-xl"
-            >
-                ← Back to dashboard
-            </button>
+            {/* <div>
+                <button
+                    onClick={handleBack}
+                    className="text-sm font-medium text-base-content/50 hover:text-primary hover:cursor-pointer"
+                >
+                    ← Dashboard
+                </button>
+
+            </div> */}
             <div className="mx-auto max-w-7xl">
 
 

@@ -23,7 +23,7 @@ function RegistrationComplete() {
 
     const [error, setError] = useState("");
 
-    console.log("RegistrationData:", registrationData);
+    // console.log("RegistrationData:", registrationData);
 
     const completeRegistration = async () => {
 
@@ -62,55 +62,55 @@ function RegistrationComplete() {
                 await user.getIdToken(true);
 
 
-            const payload = {
-                role:
-                    registrationData.role,
+            // const payload = {
+            //     role:
+            //         registrationData.role,
 
-                first_name:
-                    registrationData.first_name,
+            //     first_name:
+            //         registrationData.first_name,
 
-                last_name:
-                    registrationData.last_name,
+            //     last_name:
+            //         registrationData?.last_name,
 
-                phone:
-                    registrationData.phone,
+            //     phone:
+            //         registrationData?.phone,
 
-                gender:
-                    registrationData.gender,
+            //     gender:
+            //         registrationData?.gender,
 
-                date_of_birth:
-                    registrationData.date_of_birth,
+            //     date_of_birth:
+            //         registrationData?.date_of_birth,
 
-                school_name:
-                    registrationData.school_name,
+            //     school_name:
+            //         registrationData?.school_name,
 
-                school_type:
-                    registrationData.school_type,
+            //     school_type:
+            //         registrationData?.school_type,
 
-                school_email:
-                    registrationData.school_email,
+            //     school_email:
+            //         registrationData?.school_email,
 
-                school_phone:
-                    registrationData.school_phone,
+            //     school_phone:
+            //         registrationData?.school_phone,
 
-                eiin:
-                    registrationData.eiin,
+            //     eiin:
+            //         registrationData?.eiin,
 
-                division:
-                    registrationData.division,
+            //     division:
+            //         registrationData?.division,
 
-                district:
-                    registrationData.district,
+            //     district:
+            //         registrationData?.district,
 
-                upazila:
-                    registrationData.upazila,
+            //     upazila:
+            //         registrationData?.upazila,
 
-                address:
-                    registrationData.address,
+            //     address:
+            //         registrationData?.address,
 
-                website:
-                    registrationData.website,
-            };
+            //     website:
+            //         registrationData?.website,
+            // };
 
             const response = await fetch(
                 `${import.meta.env.VITE_API_BASE_URL}/auth/school_admin/complete`,
@@ -125,7 +125,7 @@ function RegistrationComplete() {
                             `Bearer ${idToken}`,
                     },
 
-                    body: JSON.stringify(payload),
+                    body: JSON.stringify(registrationData),
                 }
             );
 
@@ -133,7 +133,7 @@ function RegistrationComplete() {
             const result =
                 await response.json();
 
-            console.log("CompleteRegistration:", result);
+            // console.log("CompleteRegistration:", result);
 
 
             if (!response.ok) {
@@ -149,9 +149,9 @@ function RegistrationComplete() {
 
             const backendResponse = await exchangeFirebaseToken(idToken);
 
-            console.log("response complete registration:", backendResponse);
+            // console.log("response complete registration:", backendResponse);
 
-            console.log("complete registration id token:", idToken);
+            // console.log("complete registration id token:", idToken);
 
             setUser(backendResponse.user);
             setAccessToken(backendResponse.access_token);
@@ -229,7 +229,7 @@ function RegistrationComplete() {
 
         completeRegistration();
 
-        console.log("CompleteRegistration_user:", user);
+        // console.log("CompleteRegistration_user:", user);
         
     }, []);
 
@@ -426,7 +426,7 @@ function RegistrationComplete() {
                             </span>
 
                             <span className="badge badge-success">
-                                Free
+                                Paid
                             </span>
 
                         </div>

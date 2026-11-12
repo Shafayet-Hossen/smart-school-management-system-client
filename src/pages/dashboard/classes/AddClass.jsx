@@ -85,7 +85,7 @@ function AddClass() {
 
         // Redirect after successful creation
         setTimeout(() => {
-          navigate("/classes");
+          navigate("/school-admin/classes");
         }, 1000);
       }
     } catch (err) {
@@ -124,7 +124,7 @@ function AddClass() {
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
           <div>
-            <div className="breadcrumbs text-sm">
+            {/* <div className="breadcrumbs text-sm">
               <ul>
                 <li>
                   <button
@@ -137,7 +137,7 @@ function AddClass() {
 
                 <li>Add Class</li>
               </ul>
-            </div>
+            </div> */}
 
             <h1 className="mt-2 text-2xl font-bold sm:text-3xl">
               Add Class
@@ -148,13 +148,13 @@ function AddClass() {
             </p>
           </div>
 
-          <button
+          {/* <button
             type="button"
             onClick={() => navigate("/classes")}
             className="btn btn-outline"
           >
             ← Back to Classes
-          </button>
+          </button> */}
         </div>
 
         {/* -------------------------------- */}
@@ -291,7 +291,7 @@ function AddClass() {
 
               <button
                 type="button"
-                onClick={() => navigate("/classes")}
+                onClick={() => navigate("/school-admin/classes")}
                 disabled={submitting}
                 className="btn btn-ghost"
               >

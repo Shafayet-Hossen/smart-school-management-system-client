@@ -25,7 +25,7 @@ function Contact() {
 
     // Temporary frontend submission.
     // This will later connect to your backend API.
-    console.log("Contact form:", formData);
+    // console.log("Contact form:", formData);
 
     setSubmitted(true);
 

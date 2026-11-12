@@ -20,6 +20,8 @@ function StudentVerify() {
         updateField,
     } = useRegistration();
 
+    // console.log("Registration Data",registrationData)
+
     const [resending, setResending] = useState(false);
 
     const [message, setMessage] = useState("");

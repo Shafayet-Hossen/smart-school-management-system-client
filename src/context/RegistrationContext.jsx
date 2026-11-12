@@ -72,6 +72,7 @@ export function RegistrationProvider({ children }) {
             ...previous,
             ...data,
         }));
+        // console.log("Updated registration data:", registrationData);
     };
 
     const updateField = (field, value) => {
@@ -79,6 +80,8 @@ export function RegistrationProvider({ children }) {
             ...previous,
             [field]: value,
         }));
+        // console.log(`Updated registration field: ${field} = ${value}`);
+        // console.log("Current registration data:", registrationData);
     };
 
     const resetRegistration = () => {

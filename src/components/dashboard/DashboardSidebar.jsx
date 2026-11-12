@@ -34,6 +34,31 @@ const menuByRole = {
             path: "/attendance",
             icon: "📋",
         },
+        {
+            label: "Academic Subjects",
+            path: "/academic-subjects",
+            icon: "📚",
+        },
+        {
+            label: "Exams",
+            path: "/exams",
+            icon: "📝",
+        },
+        {
+            label: "Results",
+            path: "/results",
+            icon: "📈",
+        },
+        {
+            label: "Fee Management",
+            path: "/student-fees",
+            icon: "💰",
+        },
+        {
+            label: "AssignClasses",
+            path: "/teachers/classes",
+            icon: "👨‍🏫",
+        },
     ],
 
 
@@ -55,7 +80,7 @@ const menuByRole = {
         },
         {
             label: "Attendance",
-            path: "/attendance",
+            path: "/student-attendance",
             icon: "📋",
         },
         {
@@ -63,6 +88,27 @@ const menuByRole = {
             path: "/assignments",
             icon: "📝",
         },
+        {
+            label: "Attendance History",
+            path: "/attendance-history",
+            icon: "📅",
+        },
+        {
+            label: "Exams Management",
+            path: "/teacher-exams",
+            icon: "📝",
+        },
+        {
+            label: "Fee Management",
+            path: "/teacher-fees",
+            icon: "💰",
+        },
+        {
+            label: "Results",
+            path: "/teacher-results",
+            icon: "📈",
+        },
+
     ],
 
 
@@ -73,25 +119,31 @@ const menuByRole = {
             icon: "📊",
         },
         {
-            label: "My Classes",
-            path: "/my-classes",
-            icon: "🏫",
-        },
-        {
             label: "Attendance",
-            path: "/attendance",
+            path: "/my-attendance",
             icon: "📋",
         },
         {
             label: "Assignments",
-            path: "/assignments",
+            path: "/my-assignments",
             icon: "📝",
         },
         {
+            label: "Exam Management",
+            path: "/student-exams",
+            icon: "📝",
+        },
+        {
+            label: "Fee Management",
+            path: "/my-fees",
+            icon: "💰",
+        },
+        {
             label: "Results",
-            path: "/results",
+            path: "/student-results",
             icon: "📈",
         },
+        
     ],
 
 
@@ -108,19 +160,34 @@ const menuByRole = {
         },
         {
             label: "Attendance",
-            path: "/attendance",
+            path: "/children-attendance",
             icon: "📋",
         },
         {
             label: "Assignments",
-            path: "/assignments",
+            path: "/children-assignments",
             icon: "📝",
         },
         {
-            label: "Academic",
-            path: "/academic",
-            icon: "📚",
+            label: "Exam Management",
+            path: "/parent-exams",
+            icon: "📝",
         },
+        {
+            label: "Fee Management",
+            path: "/parent/fees",
+            icon: "💰",
+        },
+        {
+            label: "Results",
+            path: "/results",
+            icon: "📈",
+        },
+        // {
+        //     label: "Academic",
+        //     path: "/academic",
+        //     icon: "📚",
+        // },
     ],
 
 };

@@ -34,7 +34,7 @@ function SchoolAdminSchool() {
     registrationData,
     updateRegistration,
   } = useRegistration();
-
+  // console.log("registrationData", registrationData);
   const [formData, setFormData] = useState({
     school_name: registrationData.school_name || "",
     school_type: registrationData.school_type || "",
@@ -60,7 +60,7 @@ function SchoolAdminSchool() {
 
     setError("");
   };
-
+  
   const validateForm = () => {
     if (!formData.school_name.trim()) {
       return "Please enter your school name.";
@@ -121,12 +121,13 @@ function SchoolAdminSchool() {
 
       status: "school_information_completed",
     });
+    // console.log("registrationData after update", registrationData);
 
-    navigate("/register/school_admin/account");
+    navigate("/register/school_admin/school/subscription");
   };
 
   const handleBack = () => {
-    navigate("/register/school_admin");
+    navigate("/register/school_admin/school");
   };
 
   if (registrationData.role !== "school_admin") {

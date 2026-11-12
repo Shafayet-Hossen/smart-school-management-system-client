@@ -18,6 +18,8 @@ function StudentAccount() {
         updateField,
     } = useRegistration();
 
+    // console.log("Registration Data", registrationData);
+    
     const [email, setEmail] = useState(
         registrationData.email || ""
     );
@@ -127,7 +129,7 @@ function StudentAccount() {
                     password, 
                     { displayName: registrationData.first_name, }
                 );
-            console.log("firebaseUser", firebase_user)
+            // console.log("firebaseUser", firebase_user)
             /*
             |--------------------------------------------------------------------------
             | Send Firebase Email Verification
@@ -159,7 +161,7 @@ function StudentAccount() {
             | Navigate to Email Verification
             |--------------------------------------------------------------------------
             */
-            console.log("Create Account Successfull");
+            // console.log("Create Account Successfull");
 
             navigate(
                 "/register/student/verify",

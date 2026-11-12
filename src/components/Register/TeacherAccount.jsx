@@ -155,7 +155,7 @@ function TeacherAccount() {
                     registrationData.email.trim(),
                     password, { displayName: registrationData.first_name, }
                 );
-            console.log("firebaseUser", firebase_user)
+            // console.log("firebaseUser", firebase_user)
 
 
 
@@ -202,7 +202,7 @@ function TeacherAccount() {
             | Navigate to Email Verification
             |--------------------------------------------------------------------------
             */
-            console.log("Create Account Successfull");
+            // console.log("Create Account Successfull");
 
             navigate(
                 "/register/teacher/verify",

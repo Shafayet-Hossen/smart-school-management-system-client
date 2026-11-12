@@ -16,7 +16,7 @@ function AddStudent() {
   const [success, setSuccess] = useState("");
 
   const [formData, setFormData] = useState({
-    student_id: "",
+    // student_id: "",
     first_name: "",
     last_name: "",
     email: "",
@@ -42,7 +42,7 @@ function AddStudent() {
         setError("");
 
         const response = await api.get("/classes");
-        console.log("Classes response:", response.data.data);
+        // console.log("Classes response:", response.data.data);
         setClasses(response.data?.data || []);
       } catch (err) {
         console.error("Failed to load classes:", err);
@@ -78,7 +78,7 @@ function AddStudent() {
         );
 
         setSections(response.data?.data || []);
-        console.log("Sections response:", response.data.data);
+        // console.log("Sections response:", response.data.data);
       } catch (err) {
         console.error("Failed to load sections:", err);
 
@@ -136,9 +136,9 @@ function AddStudent() {
   // Validation
   // ---------------------------------------
   const validateForm = () => {
-    if (!formData.student_id.trim()) {
-      return "Student ID is required.";
-    }
+    // if (!formData.student_id.trim()) {
+    //   return "Student ID is required.";
+    // }
 
     if (!formData.first_name.trim()) {
       return "First name is required.";
@@ -179,7 +179,7 @@ function AddStudent() {
       setSubmitting(true);
 
       const payload = {
-        student_id: formData.student_id.trim(),
+        // student_id: formData.student_id.trim(),
         first_name: formData.first_name.trim(),
         last_name: formData.last_name.trim(),
         email: formData.email.trim(),
@@ -195,14 +195,14 @@ function AddStudent() {
         guardian_phone: formData.guardian_phone.trim(),
         status: formData.status,
       };
-      console.log("Submitting student data:", payload);
+      // console.log("Submitting student data:", payload);
       const response = await api.post("/students", payload);
 
       if (response.data?.success) {
         setSuccess("Student added successfully.");
 
         setTimeout(() => {
-          navigate("/students");
+          navigate("/school-admin/students");
         }, 1000);
       }
     } catch (err) {
@@ -222,7 +222,7 @@ function AddStudent() {
   // ---------------------------------------
   const handleReset = () => {
     setFormData({
-      student_id: "",
+      // student_id: "",
       first_name: "",
       last_name: "",
       email: "",
@@ -246,12 +246,12 @@ function AddStudent() {
 
   return (
     <div className="min-h-screen bg-base-200">
-      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
 
         {/* Header */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="breadcrumbs text-sm">
+            {/* <div className="breadcrumbs text-sm">
               <ul>
                 <li>
                   <button onClick={() => navigate("/students")}>
@@ -260,7 +260,7 @@ function AddStudent() {
                 </li>
                 <li>Add Student</li>
               </ul>
-            </div>
+            </div> */}
 
             <h1 className="mt-2 text-2xl font-bold sm:text-3xl">
               Add Student
@@ -272,13 +272,13 @@ function AddStudent() {
             </p>
           </div>
 
-          <button
+          {/* <button
             type="button"
             onClick={() => navigate("/students")}
             className="btn btn-outline"
           >
             ← Back to Students
-          </button>
+          </button> */}
         </div>
 
         {/* Error */}
@@ -315,7 +315,7 @@ function AddStudent() {
               <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
 
                 {/* Student ID */}
-                <div className="form-control">
+                {/* <div className="form-control">
                   <label className="label">
                     <span className="label-text font-medium">
                       Student ID *
@@ -336,7 +336,7 @@ function AddStudent() {
                       This ID will be used during student registration.
                     </span>
                   </label>
-                </div>
+                </div> */}
 
                 {/* First Name */}
                 <div className="form-control">
@@ -673,7 +673,7 @@ function AddStudent() {
 
               <button
                 type="button"
-                onClick={() => navigate("/students")}
+                onClick={() => navigate("/school-admin/students")}
                 disabled={submitting}
                 className="btn btn-ghost"
               >

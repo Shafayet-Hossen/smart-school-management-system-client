@@ -68,7 +68,7 @@ function ParentSchool() {
             );
 
             const result = response.data;
-            console.log("teacherSchool:",result.data)
+            // console.log("teacherSchool:",result.data)
 
             if (!result?.success) {
                 throw new Error(

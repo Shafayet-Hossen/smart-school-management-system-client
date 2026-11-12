@@ -10,7 +10,7 @@ const Students = () => {
   const [sections, setSections] = useState([]);
 
   const [search, setSearch] = useState("");
-  const [classId, setClassId] = useState("");
+  const [classCode, setClassCode] = useState("");
   const [sectionId, setSectionId] = useState("");
 
   const [loading, setLoading] = useState(true);
@@ -33,7 +33,7 @@ const Students = () => {
 
       setError(
         error.response?.data?.message ||
-          "Failed to load classes."
+        "Failed to load classes."
       );
     }
   };
@@ -62,7 +62,7 @@ const Students = () => {
 
       setError(
         error.response?.data?.message ||
-          "Failed to load sections."
+        "Failed to load sections."
       );
     } finally {
       setFilterLoading(false);
@@ -83,8 +83,8 @@ const Students = () => {
         params.search = search.trim();
       }
 
-      if (classId) {
-        params.class_id = classId;
+      if (classCode) {
+        params.class_code = classCode;
       }
 
       if (sectionId) {
@@ -101,7 +101,7 @@ const Students = () => {
 
       setError(
         error.response?.data?.message ||
-          "Failed to load students."
+        "Failed to load students."
       );
 
       setStudents([]);
@@ -121,15 +121,15 @@ const Students = () => {
   // Fetch Sections when Class Changes
   // --------------------------------------------------
   useEffect(() => {
-    if (!classId) {
+    if (!classCode) {
       setSections([]);
       setSectionId("");
       return;
     }
 
     setSectionId("");
-    fetchSections(classId);
-  }, [classId]);
+    fetchSections(classCode);
+  }, [classCode]);
 
   // --------------------------------------------------
   // Fetch Students
@@ -140,7 +140,7 @@ const Students = () => {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [search, classId, sectionId]);
+  }, [search, classCode, sectionId]);
 
   // --------------------------------------------------
   // Delete Student
@@ -177,7 +177,7 @@ const Students = () => {
 
       setError(
         error.response?.data?.message ||
-          "Failed to delete student."
+        "Failed to delete student."
       );
     } finally {
       setDeleteLoading(null);
@@ -189,339 +189,357 @@ const Students = () => {
   // --------------------------------------------------
   const handleResetFilters = () => {
     setSearch("");
-    setClassId("");
+    setClassCode("");
     setSectionId("");
     setSections([]);
   };
+
+  // const handleBack = () => {
+
+  //   navigate("/dashboard");
+
+  // };
 
   // --------------------------------------------------
   // Render
   // --------------------------------------------------
   return (
-    <div className="p-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">
-            Students
-          </h1>
+    <div className="min-h-screen bg-base-200">
+      <div className="mx-auto max-w-7xl px-4  sm:px-2 ">
+        {/* <div>
 
-          <p className="text-sm text-base-content/60 mt-1">
-            Manage students in your school.
-          </p>
-        </div>
+          <button
+            onClick={handleBack}
+            className="text-sm font-medium text-base-content/50 hover:text-primary hover:cursor-pointer"
+          >
+            ← Dashboard
+          </button>
 
-        <button
-          type="button"
-          onClick={() => navigate("/students/add")}
-          className="btn btn-primary"
-        >
-          + Add Student
-        </button>
-      </div>
+        </div> */}
+        {/* Header */}
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
 
-      {/* Success Message */}
-      {success && (
-        <div className="alert alert-success mb-4">
-          <span>{success}</span>
-        </div>
-      )}
+          <div>
+            <h1 className="text-2xl font-bold">
+              Students
+            </h1>
 
-      {/* Error Message */}
-      {error && (
-        <div className="alert alert-error mb-4">
-          <span>{error}</span>
+            <p className="text-sm text-base-content/60 mt-1">
+              Manage students in your school.
+            </p>
+          </div>
 
           <button
             type="button"
-            className="btn btn-sm btn-ghost"
-            onClick={() => setError("")}
+            onClick={() => navigate("/school-admin/add-students")}
+            className="btn btn-primary"
           >
-            ✕
+            + Add Student
           </button>
         </div>
-      )}
 
-      {/* Filters */}
-      <div className="card bg-base-100 shadow-sm border border-base-300 mb-6">
-        <div className="card-body">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Search */}
-            <div>
-              <label className="label">
-                <span className="label-text">
-                  Search Student
-                </span>
-              </label>
+        {/* Success Message */}
+        {success && (
+          <div className="alert alert-success mb-4">
+            <span>{success}</span>
+          </div>
+        )}
 
-              <input
-                type="text"
-                placeholder="Name, ID, email..."
-                value={search}
-                onChange={(e) =>
-                  setSearch(e.target.value)
-                }
-                className="input input-bordered w-full"
-              />
-            </div>
+        {/* Error Message */}
+        {error && (
+          <div className="alert alert-error mb-4">
+            <span>{error}</span>
 
-            {/* Class */}
-            <div>
-              <label className="label">
-                <span className="label-text">
-                  Class
-                </span>
-              </label>
+            <button
+              type="button"
+              className="btn btn-sm btn-ghost"
+              onClick={() => setError("")}
+            >
+              ✕
+            </button>
+          </div>
+        )}
 
-              <select
-                value={classId}
-                onChange={(e) =>
-                  setClassId(e.target.value)
-                }
-                className="select select-bordered w-full"
-              >
-                <option value="">
-                  All Classes
-                </option>
+        {/* Filters */}
+        <div className="card bg-base-100 shadow-sm border border-base-300 mb-6">
+          <div className="card-body">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Search */}
+              <div>
+                <label className="label">
+                  <span className="label-text">
+                    Search Student
+                  </span>
+                </label>
 
-                {classes.map((item) => (
-                  <option
-                    key={item._id}
-                    value={item._id}
-                  >
-                    {item.name}
+                <input
+                  type="text"
+                  placeholder="Name, ID, email..."
+                  value={search}
+                  onChange={(e) =>
+                    setSearch(e.target.value)
+                  }
+                  className="input input-bordered w-full"
+                />
+              </div>
+
+              {/* Class */}
+              <div>
+                <label className="label">
+                  <span className="label-text">
+                    Class
+                  </span>
+                </label>
+
+                <select
+                  value={classCode}
+                  onChange={(e) =>
+                    setClassCode(e.target.value)
+                  }
+                  className="select select-bordered w-full"
+                >
+                  <option value="">
+                    All Classes
                   </option>
-                ))}
-              </select>
-            </div>
 
-            {/* Section */}
-            <div>
-              <label className="label">
-                <span className="label-text">
-                  Section
-                </span>
-              </label>
+                  {classes.map((item) => (
+                    <option
+                      key={item.class_code}
+                      value={item.class_code}
+                    >
+                      {item.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-              <select
-                value={sectionId}
-                onChange={(e) =>
-                  setSectionId(e.target.value)
-                }
-                disabled={!classId || filterLoading}
-                className="select select-bordered w-full"
-              >
-                <option value="">
-                  {filterLoading
-                    ? "Loading..."
-                    : "All Sections"}
-                </option>
+              {/* Section */}
+              <div>
+                <label className="label">
+                  <span className="label-text">
+                    Section
+                  </span>
+                </label>
 
-                {sections.map((section) => (
-                  <option
-                    key={section._id}
-                    value={section._id}
-                  >
-                    {section.name}
+                <select
+                  value={sectionId}
+                  onChange={(e) =>
+                    setSectionId(e.target.value)
+                  }
+                  disabled={!classCode || filterLoading}
+                  className="select select-bordered w-full"
+                >
+                  <option value="">
+                    {filterLoading
+                      ? "Loading..."
+                      : "All Sections"}
                   </option>
-                ))}
-              </select>
-            </div>
 
-            {/* Reset */}
-            <div className="flex items-end">
-              <button
-                type="button"
-                onClick={handleResetFilters}
-                className="btn btn-outline w-full"
-              >
-                Reset Filters
-              </button>
+                  {sections.map((section) => (
+                    <option
+                      key={section._id}
+                      value={section._id}
+                    >
+                      {section.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Reset */}
+              <div className="flex items-end">
+                <button
+                  type="button"
+                  onClick={handleResetFilters}
+                  className="btn btn-outline w-full"
+                >
+                  Reset Filters
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Student Count */}
-      <div className="mb-4">
-        <span className="text-sm text-base-content/60">
-          Showing{" "}
-          <span className="font-semibold">
-            {students.length}
-          </span>{" "}
-          student{students.length !== 1 ? "s" : ""}
-        </span>
-      </div>
+        {/* Student Count */}
+        <div className="mb-4">
+          <span className="text-sm text-base-content/60">
+            Showing{" "}
+            <span className="font-semibold">
+              {students.length}
+            </span>{" "}
+            student{students.length !== 1 ? "s" : ""}
+          </span>
+        </div>
 
-      {/* Students Table */}
-      <div className="card bg-base-100 shadow-sm border border-base-300">
-        <div className="card-body p-0">
-          <div className="overflow-x-auto">
-            <table className="table table-zebra">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Student</th>
-                  <th>Student ID</th>
-                  <th>Class</th>
-                  <th>Section</th>
-                  <th>Roll</th>
-                  <th>Phone</th>
-                  <th>Status</th>
-                  <th>Registration</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {loading ? (
+        {/* Students Table */}
+        <div className="card bg-base-100 shadow-sm border border-base-300">
+          <div className="card-body p-0">
+            <div className="overflow-x-auto">
+              <table className="table table-zebra">
+                <thead>
                   <tr>
-                    <td
-                      colSpan="10"
-                      className="text-center py-10"
-                    >
-                      <span className="loading loading-spinner loading-md"></span>
-                    </td>
+                    <th>#</th>
+                    <th>Student</th>
+                    <th>Student ID</th>
+                    <th>Class</th>
+                    <th>Section</th>
+                    <th>Roll</th>
+                    <th>Phone</th>
+                    <th>Status</th>
+                    <th>Registration</th>
+                    <th>Actions</th>
                   </tr>
-                ) : students.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan="10"
-                      className="text-center py-10"
-                    >
-                      <div className="flex flex-col items-center gap-2">
-                        <span className="text-base-content/50">
-                          No students found.
-                        </span>
+                </thead>
 
-                        <button
-                          type="button"
-                          onClick={() =>
-                            navigate("/students/add")
-                          }
-                          className="btn btn-sm btn-primary"
-                        >
-                          Add Student
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  students.map((student, index) => (
-                    <tr key={student._id}>
-                      {/* Number */}
-                      <td>{index + 1}</td>
-
-                      {/* Student */}
-                      <td>
-                        <div className="font-semibold">
-                          {student.first_name}{" "}
-                          {student.last_name}
-                        </div>
-
-                        {student.email && (
-                          <div className="text-xs text-base-content/50">
-                            {student.email}
-                          </div>
-                        )}
+                <tbody>
+                  {loading ? (
+                    <tr>
+                      <td
+                        colSpan="10"
+                        className="text-center py-10"
+                      >
+                        <span className="loading loading-spinner loading-md"></span>
                       </td>
-
-                      {/* Student ID */}
-                      <td>
-                        <span className="font-mono text-sm">
-                          {student.student_id}
-                        </span>
-                      </td>
-
-                      {/* Class */}
-                      <td>
-                        {student.class_name || "-"}
-                      </td>
-
-                      {/* Section */}
-                      <td>
-                        {student.section_name || "-"}
-                      </td>
-
-                      {/* Roll */}
-                      <td>
-                        {student.roll_number || "-"}
-                      </td>
-
-                      {/* Phone */}
-                      <td>
-                        {student.phone || "-"}
-                      </td>
-
-                      {/* Status */}
-                      <td>
-                        {student.status === "active" ? (
-                          <span className="badge badge-success badge-sm">
-                            Active
+                    </tr>
+                  ) : students.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan="10"
+                        className="text-center py-10"
+                      >
+                        <div className="flex flex-col items-center gap-2">
+                          <span className="text-base-content/50">
+                            No students found.
                           </span>
-                        ) : (
-                          <span className="badge badge-error badge-sm">
-                            {student.status || "Inactive"}
-                          </span>
-                        )}
-                      </td>
 
-                      {/* Registration Status */}
-                      <td>
-                        {student.registration_status ===
-                        "registered" ? (
-                          <span className="badge badge-success badge-sm">
-                            Registered
-                          </span>
-                        ) : (
-                          <span className="badge badge-warning badge-sm">
-                            Not Registered
-                          </span>
-                        )}
-                      </td>
-
-                      {/* Actions */}
-                      <td>
-                        <div className="flex gap-2">
-                          {/* Edit */}
                           <button
                             type="button"
-                            className="btn btn-sm btn-outline"
                             onClick={() =>
-                              navigate(
-                                `/students/${student._id}/edit`
-                              )
+                              navigate("/school-admin/add-students")
                             }
+                            className="btn btn-sm btn-primary"
                           >
-                            Edit
-                          </button>
-
-                          {/* Delete */}
-                          <button
-                            type="button"
-                            className="btn btn-sm btn-error btn-outline"
-                            disabled={
-                              deleteLoading ===
-                              student._id
-                            }
-                            onClick={() =>
-                              handleDelete(student)
-                            }
-                          >
-                            {deleteLoading ===
-                            student._id ? (
-                              <span className="loading loading-spinner loading-xs"></span>
-                            ) : (
-                              "Delete"
-                            )}
+                            Add Student
                           </button>
                         </div>
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    students.map((student, index) => (
+                      <tr key={student._id}>
+                        {/* Number */}
+                        <td>{index + 1}</td>
+
+                        {/* Student */}
+                        <td>
+                          <div className="font-semibold">
+                            {student.first_name}{" "}
+                            {student.last_name}
+                          </div>
+
+                          {student.email && (
+                            <div className="text-xs text-base-content/50">
+                              {student.email}
+                            </div>
+                          )}
+                        </td>
+
+                        {/* Student ID */}
+                        <td>
+                          <span className="font-mono text-sm">
+                            {student.student_id}
+                          </span>
+                        </td>
+
+                        {/* Class */}
+                        <td>
+                          {student.class_name || "-"}
+                        </td>
+
+                        {/* Section */}
+                        <td>
+                          {student.section_name || "-"}
+                        </td>
+
+                        {/* Roll */}
+                        <td>
+                          {student.roll_number || "-"}
+                        </td>
+
+                        {/* Phone */}
+                        <td>
+                          {student.phone || "-"}
+                        </td>
+
+                        {/* Status */}
+                        <td>
+                          {student.status === "active" ? (
+                            <span className="badge badge-success badge-sm">
+                              Active
+                            </span>
+                          ) : (
+                            <span className="badge badge-error badge-sm">
+                              {student.status || "Inactive"}
+                            </span>
+                          )}
+                        </td>
+
+                        {/* Registration Status */}
+                        <td>
+                          {student.firebase_uid? (
+                            <span className="badge badge-success badge-sm">
+                              Registered
+                            </span>
+                          ) : (
+                            <span className="badge badge-warning badge-sm">
+                              Not Registered
+                            </span>
+                          )}
+                        </td>
+
+                        {/* Actions */}
+                        <td>
+                          <div className="flex gap-2">
+                            {/* Edit */}
+                            <button
+                              type="button"
+                              className="btn btn-sm btn-outline"
+                              onClick={() =>
+                                navigate(
+                                  `/school-admin/students/${student._id}/edit`
+                                )
+                              }
+                            >
+                              Edit
+                            </button>
+
+                            {/* Delete */}
+                            <button
+                              type="button"
+                              className="btn btn-sm btn-error btn-outline"
+                              disabled={
+                                deleteLoading ===
+                                student._id
+                              }
+                              onClick={() =>
+                                handleDelete(student)
+                              }
+                            >
+                              {deleteLoading ===
+                                student._id ? (
+                                <span className="loading loading-spinner loading-xs"></span>
+                              ) : (
+                                "Delete"
+                              )}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

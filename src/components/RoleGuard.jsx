@@ -6,7 +6,7 @@ const RoleGuard = ({
 }) => {
   
   if (!allowedRoles.includes(userRole)) {
-    return null;
+    return fallback;
   }
 
   return children;

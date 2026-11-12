@@ -6,7 +6,7 @@ function RegistrationBranch() {
   const { role } = useParams();
   const navigate = useNavigate();
 
-  console.log("Registration Branch",role)
+  // console.log("Registration Branch",role)
   
   const { registrationData, updateField } = useRegistration();
 

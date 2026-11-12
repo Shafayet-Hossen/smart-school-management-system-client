@@ -26,7 +26,7 @@ export const apiRequest = async (token,
 
   try {
     data = await response.json();
-    console.log("api.service",data);
+    // console.log("api.service",data);
   } catch {
     data = null;
   }

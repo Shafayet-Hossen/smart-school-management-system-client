@@ -18,6 +18,8 @@ function ParentAccount() {
         updateField,
     } = useRegistration();
 
+    // console.log("Registration Data", registrationData)
+    
     const [email, setEmail] = useState(
         registrationData.email || ""
     );
@@ -127,7 +129,7 @@ function ParentAccount() {
                     password, 
                     { displayName: registrationData.first_name, }
                 );
-            console.log("firebaseUser", firebase_user)
+            // console.log("firebaseUser", firebase_user)
             /*
             |--------------------------------------------------------------------------
             | Send Firebase Email Verification
@@ -159,7 +161,7 @@ function ParentAccount() {
             | Navigate to Email Verification
             |--------------------------------------------------------------------------
             */
-            console.log("Create Account Successfull");
+            // console.log("Create Account Successfull");
 
             navigate(
                 "/register/parent/verify",
@@ -721,7 +723,7 @@ function ParentAccount() {
                     DEBUG
                 ========================================================= */}
 
-                {import.meta.env.DEV && (
+                {/* {import.meta.env.DEV && (
                     <pre className="mt-8 overflow-auto rounded-xl bg-neutral p-4 text-xs text-neutral-content">
                         {JSON.stringify(
                             registrationData,
@@ -729,7 +731,7 @@ function ParentAccount() {
                             2
                         )}
                     </pre>
-                )}
+                )} */}
 
             </div>
 

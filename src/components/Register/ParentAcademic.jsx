@@ -3,1491 +3,736 @@ import { useNavigate } from "react-router-dom";
 
 import api from "../../services/api.js";
 import { useRegistration } from "../../context/RegistrationContext.jsx";
-// import { useAuth } from "../../context/AuthContext.jsx";
 
-function ParentAcademic() {
-    const navigate = useNavigate();
-    // const {loading, setLoading} = useAuth();
-    const {
-        registrationData,
-        updateField,
-    } = useRegistration();
-    /*
-    |--------------------------------------------------------------------------
-    | State
-    |--------------------------------------------------------------------------
-    */
+const createEmptyChild = () => ({
+  childId: crypto.randomUUID(),
+  student_roll: "",
+  class_id: "",
+  class_name: "",
+  section_id: "",
+  section_name: "",
+  student: null,
+  lookupStatus: "idle",
+  lookupMessage: "",
+});
 
-    const [classes, setClasses] = useState([]);
-    const [sections, setSections] = useState([]);
+const getId = (item) => String(item?._id ?? item?.id ?? "");
 
-    const [loadingClasses, setLoadingClasses] =
-        useState(false);
+const getClassName = (item) =>
+  item?.class_name ?? item?.name ?? item?.class_code ?? "Class";
 
-    const [loadingSections, setLoadingSections] =
-        useState(false);
+const getSectionName = (item) =>
+  item?.section_name ?? item?.name ?? item?.section_code ?? "Section";
 
-    const [error, setError] = useState("");
-    /*
-       |--------------------------------------------------------------------------
-       | Child Information
-       |--------------------------------------------------------------------------
-       */
+export default function ParentAcademic() {
+  const navigate = useNavigate();
+  const { registrationData, updateField } = useRegistration();
 
-    const [childFirstName, setChildFirstName] =
-        useState(
-            registrationData.child_first_name || ""
+  const schoolId = registrationData?.school_id;
+
+  const [classes, setClasses] = useState([]);
+  const [children, setChildren] = useState(() => {
+    if (
+      Array.isArray(registrationData?.children) &&
+      registrationData.children.length
+    ) {
+      return registrationData.children.map((child) => ({
+        ...createEmptyChild(),
+        ...child,
+        childId: child.childId || crypto.randomUUID(),
+        student: child.student || null,
+        lookupStatus: "idle",
+        lookupMessage: "",
+      }));
+    }
+
+    return [createEmptyChild()];
+  });
+
+  const [sectionsByChild, setSectionsByChild] = useState({});
+  const [loadingClasses, setLoadingClasses] = useState(true);
+  const [loadingSections, setLoadingSections] = useState({});
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  // Load the classes belonging to the selected school.
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchClasses() {
+      if (!schoolId) {
+        setClasses([]);
+        setLoadingClasses(false);
+        return;
+      }
+
+      setLoadingClasses(true);
+      setError("");
+
+      try {
+        const response = await api.get(
+          `/auth/schools/${schoolId}/classes`
         );
 
-    const [childLastName, setChildLastName] =
-        useState(
-            registrationData.child_last_name || ""
-        );
+        if (!cancelled) {
+          setClasses(response.data?.classes ?? []);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(
+            err.response?.data?.message ||
+              "Unable to load classes."
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingClasses(false);
+        }
+      }
+    }
 
-    const [studentId, setStudentId] =
-        useState(
-            registrationData.student_id || ""
-        );
+    fetchClasses();
 
+    return () => {
+      cancelled = true;
+    };
+  }, [schoolId]);
 
-    /*
-    |--------------------------------------------------------------------------
-    | Academic Selection
-    |--------------------------------------------------------------------------
-    */
+  // Fetch sections for a particular class.
+  const fetchSections = async (childId, classId) => {
+    if (!classId) return;
 
-    // const [selectedClass, setSelectedClass] =
-    //     useState(
-    //         registrationData.class_id || ""
-    //     );
+    setLoadingSections((previous) => ({
+      ...previous,
+      [childId]: true,
+    }));
 
-    // const [selectedSection, setSelectedSection] =
-    //     useState(
-    //         registrationData.section_id || ""
-    //     );
+    try {
+      const response = await api.get(
+        `/auth/classes/${classId}/sections`
+      );
 
-    const [classId, setClassId] = useState(
-        registrationData.class_id || ""
+      setSectionsByChild((previous) => ({
+        ...previous,
+        [childId]: response.data?.sections ?? [],
+      }));
+    } catch (err) {
+      setSectionsByChild((previous) => ({
+        ...previous,
+        [childId]: [],
+      }));
+
+      setError(
+        err.response?.data?.message ||
+          "Unable to load sections."
+      );
+    } finally {
+      setLoadingSections((previous) => ({
+        ...previous,
+        [childId]: false,
+      }));
+    }
+  };
+
+  // Restore section options when a saved registration is reopened.
+  useEffect(() => {
+    if (!classes.length) return;
+
+    children.forEach((child) => {
+      if (
+        child.class_id &&
+        !sectionsByChild[child.childId]
+      ) {
+        fetchSections(child.childId, child.class_id);
+      }
+    });
+
+    // Initial restoration after classes load.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [classes]);
+
+  const updateChild = (childId, changes) => {
+    setChildren((previous) =>
+      previous.map((child) =>
+        child.childId === childId
+          ? { ...child, ...changes }
+          : child
+      )
+    );
+  };
+
+  const handleClassChange = async (childId, classId) => {
+    const selectedClass = classes.find(
+      (item) => getId(item) === classId
     );
 
-    const [sectionId, setSectionId] = useState(
-        registrationData.section_id || ""
+    updateChild(childId, {
+      class_id: classId,
+      class_name: selectedClass
+        ? getClassName(selectedClass)
+        : "",
+      section_id: "",
+      section_name: "",
+      student_roll: "",
+      student: null,
+      lookupStatus: "idle",
+      lookupMessage: "",
+    });
+
+    setSectionsByChild((previous) => ({
+      ...previous,
+      [childId]: [],
+    }));
+
+    setError("");
+
+    if (classId) {
+      await fetchSections(childId, classId);
+    }
+  };
+
+  const handleSectionChange = (childId, sectionId) => {
+    const sections = sectionsByChild[childId] ?? [];
+
+    const selectedSection = sections.find(
+      (item) => getId(item) === sectionId
     );
 
-    // const [rollNumber, setRollNumber] = useState(
-    //     registrationData.roll_number || ""
-    // );
+    updateChild(childId, {
+      section_id: sectionId,
+      section_name: selectedSection
+        ? getSectionName(selectedSection)
+        : "",
+      student_roll: "",
+      student: null,
+      lookupStatus: "idle",
+      lookupMessage: "",
+    });
 
+    setError("");
+  };
 
-    /*
-    |--------------------------------------------------------------------------
-    | School ID
-    |--------------------------------------------------------------------------
-    */
+  const handleRollChange = (childId, roll) => {
+    updateChild(childId, {
+      student_roll: roll,
+      student: null,
+      lookupStatus: "idle",
+      lookupMessage: "",
+    });
+  };
 
-    const schoolId =
-        registrationData.school_id;
+  // Look up the student using school + class + section + roll.
+  const findStudent = async (childId) => {
+    const child = children.find(
+      (item) => item.childId === childId
+    );
 
+    if (!child) return;
 
-    /*
-    |--------------------------------------------------------------------------
-    | Check School
-    |--------------------------------------------------------------------------
-    */
+    if (!schoolId || !child.class_id || !child.section_id) {
+      updateChild(childId, {
+        lookupStatus: "error",
+        lookupMessage:
+          "Please select the class and section first.",
+      });
+      return;
+    }
 
-    useEffect(() => {
+    if (!child.student_roll.trim()) {
+      updateChild(childId, {
+        lookupStatus: "error",
+        lookupMessage: "Please enter the student's roll number.",
+      });
+      return;
+    }
 
-        if (!schoolId) {
+    updateChild(childId, {
+      student: null,
+      lookupStatus: "loading",
+      lookupMessage: "",
+    });
 
-            navigate(
-                "/register/parent/school",
-                {
-                    replace: true,
-                }
-            );
-
+    try {
+      const response = await api.get(
+        `/auth/schools/${schoolId}/students/lookup`,
+        {
+          params: {
+            class_id: child.class_id,
+            section_id: child.section_id,
+            student_roll: child.student_roll.trim(),
+          },
         }
+      );
 
-    }, [schoolId, navigate]);
+      const student = response.data?.student;
 
+      if (!student) {
+        updateChild(childId, {
+          student: null,
+          lookupStatus: "error",
+          lookupMessage:
+            "No student was found with this class, section, and roll number.",
+        });
+        return;
+      }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Load Classes
-    |--------------------------------------------------------------------------
-    */
+      updateChild(childId, {
+        student,
+        student_roll: String(
+          student.roll_number ?? child.student_roll
+        ),
+        lookupStatus: "success",
+        lookupMessage: "Student found successfully.",
+      });
+    } catch (err) {
+      updateChild(childId, {
+        student: null,
+        lookupStatus: "error",
+        lookupMessage:
+          err.response?.data?.message ||
+          "Student lookup failed. Please try again.",
+      });
+    }
+  };
 
-    useEffect(() => {
+  const addChild = () => {
+    setChildren((previous) => [
+      ...previous,
+      createEmptyChild(),
+    ]);
+  };
 
+  const removeChild = (childId) => {
+    if (children.length === 1) {
+      setError("At least one child is required.");
+      return;
+    }
 
+    setChildren((previous) =>
+      previous.filter((child) => child.childId !== childId)
+    );
 
-        const fetchClasses = async () => {
+    setSectionsByChild((previous) => {
+      const next = { ...previous };
+      delete next[childId];
+      return next;
+    });
 
-            if (!schoolId) {
-                return;
-            }
+    setLoadingSections((previous) => {
+      const next = { ...previous };
+      delete next[childId];
+      return next;
+    });
 
-            setLoadingClasses(true);
-            setError("");
+    setError("");
+  };
 
-            try {
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    setError("");
 
-                const response =
-                    await api.get(
-                        `/auth/schools/${schoolId}/classes`,
+    if (!schoolId) {
+      setError("Please select a school first.");
+      return;
+    }
 
-                    );
+    for (let index = 0; index < children.length; index += 1) {
+      const child = children[index];
 
-                const classList =
-                    response.data?.classes || [];
-
-                console.log("ClassList:", classList);
-
-                setClasses(classList);
-
-            } catch (error) {
-
-                setClasses([]);
-
-                console.error(
-                    "Failed to load classes:",
-                    error
-                );
-
-                setError(
-                    error.response?.data?.message ||
-                    "Unable to load classes for this school."
-                );
-
-            } finally {
-
-                setLoadingClasses(false);
-
-            }
-
-        };
-
-        fetchClasses();
-
-    }, [schoolId]);
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Load Sections
-    |--------------------------------------------------------------------------
-    */
-
-    useEffect(() => {
-
-
-        const fetchSections = async () => {
-
-            if (!classId) {
-
-                return;
-            }
-
-            setSections([]);
-            setLoadingSections(true);
-            setError("");
-            // console.log("useEffect ClassId", classId)
-            try {
-
-                const response =
-                    await api.get(
-                        `/auth/classes/${classId}/sections`,
-                    );
-
-
-
-                const sectionList =
-                    response.data?.sections || [];
-
-                console.log("sections:", sectionList)
-                setSections(sectionList);
-
-            } catch (error) {
-
-                console.error(
-                    "Failed to load sections:",
-                    error
-                );
-
-                setSections([]);
-
-                setError(
-                    error.response?.data?.message ||
-                    "Unable to load sections for this class."
-                );
-
-            } finally {
-
-                setLoadingSections(false);
-
-            }
-
-        };
-
-        fetchSections();
-
-    }, [classId]);
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Class Change
-    |--------------------------------------------------------------------------
-    */
-
-    const handleClassChange = (event) => {
-
-        const selectedClassId =
-            event.target.value;
-
-        setClassId(selectedClassId);
-
-        console.log("ClassId: ", selectedClassId);
-
-        setSectionId("");
-
-        updateField(
-            "section_id",
-            ""
+      if (
+        !child.class_id ||
+        !child.section_id ||
+        !child.student_roll.trim()
+      ) {
+        setError(
+          `Please complete the class, section, and roll number for Child ${index + 1}.`
         );
+        return;
+      }
 
-        updateField(
-            "section_name",
-            ""
+      if (
+        child.lookupStatus !== "success" ||
+        !child.student
+      ) {
+        setError(
+          `Please find and confirm the student for Child ${index + 1}.`
         );
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Find selected class
-        |--------------------------------------------------------------------------
-        */
-
-        const selectedClass =
-            classes.find(
-                (item) =>
-                    String(item._id) ===
-                    String(selectedClassId) ||
-                    String(item.class_code) ===
-                    String(selectedClassId)
-            );
-
-
-        if (selectedClass) {
-
-            updateField(
-                "class_code",
-                selectedClass.class_code
-                // ||
-                // selectedClass.class_id
-            );
-            updateField(
-                "class_id",
-                selectedClass._id ||
-                    selectedClass.class_id
-            );
-
-            updateField(
-                "class_name",
-                selectedClass.name ||
-                selectedClass.class_name
-            );
-
-        } else {
-
-            updateField(
-                "class_id",
-                selectedClassId
-            );
-
-            updateField(
-                "class_name",
-                ""
-            );
-
-        }
-
-    };
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Section Change
-    |--------------------------------------------------------------------------
-    */
-
-    const handleSectionChange = (event) => {
-
-        const selectedSectionId =
-            event.target.value;
-
-        setSectionId(
-            selectedSectionId
-        );
-
-
-        const selectedSection =
-            sections.find(
-                (item) =>
-                    String(item.section_code) ===
-                    String(selectedSectionId) ||
-                    String(item.section_id) ===
-                    String(selectedSectionId)
-            );
-
-
-        if (selectedSection) {
-
-            updateField(
-                "section_id",
-                selectedSection._id ||
-                selectedSection.section_id
-            );
-
-            updateField(
-                "section_code",
-                selectedSection.section_code ||
-                selectedSection.section_id
-            );
-
-            updateField(
-                "section_name",
-                selectedSection.name ||
-                selectedSection.section_name
-            );
-
-        } else {
-
-            updateField(
-                "section_id",
-                selectedSectionId
-            );
-
-            updateField(
-                "section_name",
-                ""
-            );
-
-        }
-
-    };
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Roll Number
-    |--------------------------------------------------------------------------
-    */
-
-    // const handleRollChange = (event) => {
-
-    //     const value =
-    //         event.target.value;
-
-    //     /*
-    //     |--------------------------------------------------------------------------
-    //     | Allow only numbers
-    //     |--------------------------------------------------------------------------
-    //     */
-
-    //     if (
-    //         value === "" ||
-    //         /^[0-9]+$/.test(value)
-    //     ) {
-
-    //         setRollNumber(value);
-
-    //     }
-
-    // };
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Submit
-    |--------------------------------------------------------------------------
-    */
-
-    const handleSubmit = (event) => {
-
-        event.preventDefault();
-
-        setError("");
-
-        if (!childFirstName.trim()) {
-
-            setError(
-                "Child's first name is required."
-            );
-
-            return;
-
-        }
-
-        if (!studentId.trim()) {
-
-            setError(
-                "Student ID or roll number is required."
-            );
-
-            return;
-
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Validate Class
-        |--------------------------------------------------------------------------
-        */
-
-        if (!classId) {
-
-            setError(
-                "Please select your Child class."
-            );
-
-            return;
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Validate Section
-        |--------------------------------------------------------------------------
-        */
-
-        if (!sectionId) {
-
-            setError(
-                "Please select your child section."
-            );
-
-            return;
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Validate Roll
-        |--------------------------------------------------------------------------
-        */
-
-        // if (!rollNumber.trim()) {
-
-        //     setError(
-        //         "Please enter your Child roll number."
-        //     );
-
-        //     return;
-        // }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Save to Registration Context
-        |--------------------------------------------------------------------------
-        */
-        updateField(
-            "child_first_name",
-            childFirstName.trim()
-        );
-
-        updateField(
-            "child_last_name",
-            childLastName.trim()
-        );
-
-        // updateField(
-        //     "roll_number",
-        //     rollNumber.trim()
-        // );
-
-        updateField(
-            "student_id",
-            studentId.trim()
-        );
-
-        updateField(
-            "class_id",
-            classId
-        );
-
-        updateField(
-            "section_id",
-            sectionId
-        );
-
-
-        updateField(
-            "status",
-            "academic_information_completed"
-        );
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Continue
-        |--------------------------------------------------------------------------
-        */
-
-        navigate(
-            "/register/parent/account"
-        );
-
-    };
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Back
-    |--------------------------------------------------------------------------
-    */
-
-    const handleBack = () => {
-
-        navigate(
-            "/register/parent/school"
-        );
-
-    };
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Render
-    |--------------------------------------------------------------------------
-    */
-
+        return;
+      }
+    }
+
+    const uniqueStudents = new Set(
+      children.map((child) =>
+        String(child.student._id ?? child.student.student_id)
+      )
+    );
+
+    if (uniqueStudents.size !== children.length) {
+      setError("The same student cannot be added more than once.");
+      return;
+    }
+
+    setSubmitting(true);
+
+    const normalizedChildren = children.map((child) => ({
+      student_roll: String(child.student.roll_number),
+      class_id: child.class_id,
+      class_name: child.class_name,
+      section_id: child.section_id,
+      section_name: child.section_name,
+
+      // Use the verified student record returned by the server.
+      student_id: child.student._id ?? child.student.student_id,
+    }));
+
+    updateField("children", normalizedChildren);
+    updateField("status", "academic_information_completed");
+
+    navigate("/register/parent/account");
+  };
+
+  if (!schoolId) {
     return (
-
-        <div className="min-h-screen bg-base-200 px-4 py-10 sm:py-16">
-
-            <div className="mx-auto max-w-3xl">
-
-
-                {/* =========================================================
-                    HEADER
-                ========================================================= */}
-
-                <div className="text-center">
-
-                    <button
-                        type="button"
-                        onClick={handleBack}
-                        className="mb-8 text-sm font-medium text-base-content/50 transition hover:text-primary"
-                    >
-                        ← Back
-                    </button>
-
-
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-2xl shadow-lg">
-                        👨‍👩‍👧
-                    </div>
-
-
-                    <h1 className="mt-6 text-3xl font-extrabold tracking-tight sm:text-4xl">
-                        Child's Academic Information
-                    </h1>
-
-
-                    <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-base-content/60 sm:text-base">
-                        Tell us which student you are the parent
-                        or guardian of so we can send a connection
-                        request to the selected school.
-                    </p>
-
-                </div>
-
-
-                {/* =========================================================
-                    PROGRESS
-                ========================================================= */}
-
-                <div className="mx-auto mt-10 max-w-md">
-
-                    <div className="flex items-center gap-3">
-
-                        <div className="h-2 flex-1 rounded-full bg-primary" />
-
-                        <div className="h-2 flex-1 rounded-full bg-primary" />
-
-                        <div className="h-2 flex-1 rounded-full bg-primary" />
-
-                        <div className="h-2 flex-1 rounded-full bg-primary" />
-
-                        <div className="h-2 flex-1 rounded-full bg-base-300" />
-
-                    </div>
-
-
-                    <p className="mt-3 text-center text-xs text-base-content/50">
-                        Step 4 of 5
-                    </p>
-
-                </div>
-
-
-                {/* =========================================================
-                    SELECTED SCHOOL
-                ========================================================= */}
-
-                <div className="mt-10 rounded-2xl border border-primary/20 bg-primary/5 p-5">
-
-                    <div className="flex items-center gap-4">
-
-                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-xl text-primary-content">
-                            🏫
-                        </div>
-
-
-                        <div className="min-w-0 flex-1">
-
-                            <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-                                Selected School
-                            </p>
-
-
-                            <h2 className="mt-1 truncate font-bold">
-                                {registrationData.school_name ||
-                                    "School selected"}
-                            </h2>
-
-
-                            {registrationData.eiin && (
-
-                                <p className="mt-1 text-xs text-base-content/50">
-
-                                    EIIN:{" "}
-
-                                    {
-                                        registrationData.eiin
-                                    }
-
-                                </p>
-
-                            )}
-
-                        </div>
-
-
-                        <button
-                            type="button"
-                            onClick={() =>
-                                navigate(
-                                    "/register/parent/school"
-                                )
-                            }
-                            className="btn btn-ghost btn-sm"
-                        >
-                            Change
-                        </button>
-
-                    </div>
-
-                </div>
-
-
-                {/* =========================================================
-                    ERROR
-                ========================================================= */}
-
-                {error && (
-
-                    <div className="alert alert-error mt-6">
-
-                        <span className="text-sm">
-                            {error}
-                        </span>
-
-                    </div>
-
-                )}
-
-
-                {/* =========================================================
-                    FORM
-                ========================================================= */}
-
-                <div className="mt-6 rounded-3xl border border-base-300 bg-base-100 p-6 shadow-sm sm:p-8">
-
-
-                    {/* =====================================================
-                        CHILD NAME
-                    ===================================================== */}
-
-                    <div>
-
-                        <p className="text-sm font-bold">
-                            Child Information
-                        </p>
-
-
-                        <p className="mt-1 text-xs text-base-content/50">
-                            Enter the name of the student you want
-                            to connect with.
-                        </p>
-
-                    </div>
-
-
-                    <div className="mt-5 grid gap-5 sm:grid-cols-2">
-
-
-                        {/* First Name */}
-
-                        <div>
-
-                            <label
-                                htmlFor="child-first-name"
-                                className="label"
-                            >
-
-                                <span className="label-text font-semibold">
-                                    Child's First Name
-                                </span>
-
-                            </label>
-
-
-                            <input
-                                id="child-first-name"
-                                type="text"
-                                value={childFirstName}
-                                onChange={(event) =>
-                                    setChildFirstName(
-                                        event.target.value
-                                    )
-                                }
-                                placeholder="First name"
-                                className="input input-bordered h-12 w-full rounded-xl"
-                            />
-
-                        </div>
-
-
-                        {/* Last Name */}
-
-                        <div>
-
-                            <label
-                                htmlFor="child-last-name"
-                                className="label"
-                            >
-
-                                <span className="label-text font-semibold">
-                                    Child's Last Name
-                                </span>
-
-                            </label>
-
-
-                            <input
-                                id="child-last-name"
-                                type="text"
-                                value={childLastName}
-                                onChange={(event) =>
-                                    setChildLastName(
-                                        event.target.value
-                                    )
-                                }
-                                placeholder="Last name"
-                                className="input input-bordered h-12 w-full rounded-xl"
-                            />
-
-                        </div>
-
-                    </div>
-
-
-                    {/* =====================================================
-                        STUDENT ID
-                    ===================================================== */}
-
-                    <div className="mt-5">
-
-                        <label
-                            htmlFor="student-id"
-                            className="label"
-                        >
-
-                            <span className="label-text font-semibold">
-                                Student ID / Roll Number
-                            </span>
-
-                        </label>
-
-
-                        <input
-                            id="student-id"
-                            type="text"
-                            value={studentId}
-                            onChange={(event) =>
-                                setStudentId(
-                                    event.target.value
-                                )
-                            }
-                            placeholder="Enter student's ID or roll number"
-                            className="input input-bordered h-12 w-full rounded-xl"
-                        />
-
-
-                        <p className="mt-2 text-xs text-base-content/50">
-                            This helps the school administrator identify
-                            your child.
-                        </p>
-
-                    </div>
-
-
-                    {/* =====================================================
-                        CLASS
-                    ===================================================== */}
-
-                    <div className="mt-6">
-
-                        <label
-                            htmlFor="parent-class"
-                            className="label"
-                        >
-
-                            <span className="label-text font-semibold">
-                                Child's Class
-                            </span>
-
-                        </label>
-
-
-                        <select
-                            id="parent-class"
-                            value={classId}
-                            onChange={handleClassChange}
-                            disabled={
-                                loadingClasses
-                            }
-                            className="select select-bordered h-12 w-full rounded-xl"
-                        >
-
-                            <option value="">
-
-                                {loadingClasses
-                                    ? "Loading classes..."
-                                    : "Select child's class"}
-
-                            </option>
-
-
-                            {classes.map(
-                                (item) => (
-
-                                    <option
-                                        key={item._id}
-                                        value={item._id}
-                                    >
-
-                                        {item.class_name ||
-                                            item.name}
-
-                                    </option>
-
-                                )
-                            )}
-
-                        </select>
-
-                    </div>
-
-
-                    {/* =====================================================
-                        SECTION
-                    ===================================================== */}
-
-                    <div className="mt-5">
-
-                        <label
-                            htmlFor="parent-section"
-                            className="label"
-                        >
-
-                            <span className="label-text font-semibold">
-                                Child's Section
-                            </span>
-
-                        </label>
-
-
-                        <select
-                            id="parent-section"
-                            value={sectionId}
-                            onChange={handleSectionChange}
-                            disabled={
-                                !classId ||
-                                loadingSections
-                            }
-                            className="select select-bordered h-12 w-full rounded-xl"
-                        >
-
-                            <option value="">
-
-                                {!classId
-                                    ? "Select class first"
-                                    : loadingSections
-                                        ? "Loading sections..."
-                                        : "Select child's section"}
-
-                            </option>
-
-
-                            {sections.map(
-                                (item) => (
-
-                                    <option
-                                        key={item._id}
-                                        value={item._id}
-                                    >
-
-                                        {item.section_name ||
-                                            item.name}
-
-                                    </option>
-
-                                )
-                            )}
-
-                        </select>
-
-                    </div>
-
-
-                    {/* =====================================================
-                        INFORMATION NOTE
-                    ===================================================== */}
-
-                    <div className="mt-6 rounded-2xl border border-info/20 bg-info/5 p-4">
-
-                        <div className="flex gap-3">
-
-                            <span className="text-lg">
-                                ℹ️
-                            </span>
-
-
-                            <div>
-
-                                <p className="text-sm font-semibold">
-                                    School verification
-                                </p>
-
-
-                                <p className="mt-1 text-xs leading-5 text-base-content/50">
-                                    After you create and verify your account,
-                                    your request will be sent to the school
-                                    administrator. The administrator must
-                                    approve your request before you can access
-                                    your child's information.
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    {/* =====================================================
-                        CONTINUE
-                    ===================================================== */}
-
-                    <button
-                        type="button"
-                        onClick={handleSubmit}
-                        disabled={
-                            loadingClasses ||
-                            loadingSections ||
-                            !childFirstName.trim() ||
-                            !classId ||
-                            !sectionId 
-                            // ||
-                            // !rollNumber.trim()
-                        }
-                        className="btn btn-primary mt-8 h-12 w-full rounded-xl"
-                    >
-                        Continue →
-                    </button>
-
-                </div>
-
-
-                {/* =========================================================
-                    FOOTER
-                ========================================================= */}
-
-                <p className="mx-auto mt-6 max-w-xl text-center text-xs leading-5 text-base-content/40">
-                    Your information will only be used to identify
-                    your child and send a connection request to the
-                    selected school.
-                </p>
-
-
-                {/* =========================================================
-                    DEBUG
-                ========================================================= */}
-
-                {/* {import.meta.env.DEV && (
-
-                    <pre className="mt-8 overflow-auto rounded-xl bg-neutral p-4 text-xs text-neutral-content">
-
-                        {JSON.stringify(
-                            registrationData,
-                            null,
-                            2
-                        )}
-
-                    </pre>
-
-                )} */}
-
-            </div>
-
+      <div className="mx-auto max-w-2xl p-6">
+        <div className="alert alert-warning">
+          Please select a school first.
         </div>
 
+        <button
+          type="button"
+          className="btn btn-primary mt-4"
+          onClick={() => navigate("/register/parent/school")}
+        >
+          Select School
+        </button>
+      </div>
     );
-    // return (
-
-    //     <div className="min-h-screen bg-base-200 px-4 py-10 sm:py-16">
-
-    //         <div className="mx-auto max-w-3xl">
-
-
-    //             {/* =========================================================
-    //                 HEADER
-    //             ========================================================= */}
-
-    //             <div className="text-center">
-
-    //                 <button
-    //                     type="button"
-    //                     onClick={handleBack}
-    //                     className="mb-8 text-sm font-medium text-base-content/50 transition hover:text-primary"
-    //                 >
-    //                     ← Back
-    //                 </button>
-
-
-    //                 <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-2xl text-primary-content shadow-lg">
-    //                     🎓
-    //                 </div>
-
-
-    //                 <h1 className="mt-6 text-3xl font-extrabold tracking-tight sm:text-4xl">
-    //                     Academic Information
-    //                 </h1>
-
-
-    //                 <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-base-content/60 sm:text-base">
-    //                     Tell us about your current class
-    //                     and academic enrollment.
-    //                 </p>
-
-    //             </div>
-
-
-    //             {/* =========================================================
-    //                 PROGRESS
-    //             ========================================================= */}
-
-    //             <div className="mx-auto mt-10 max-w-md">
-
-    //                 <div className="flex items-center gap-3">
-
-    //                     <div className="h-2 flex-1 rounded-full bg-primary" />
-
-    //                     <div className="h-2 flex-1 rounded-full bg-primary" />
-
-    //                     <div className="h-2 flex-1 rounded-full bg-primary" />
-
-    //                     <div className="h-2 flex-1 rounded-full bg-base-300" />
-
-    //                 </div>
-
-
-    //                 <p className="mt-3 text-center text-xs text-base-content/50">
-    //                     Step 3 of 4
-    //                 </p>
-
-    //             </div>
-
-
-    //             {/* =========================================================
-    //                 SELECTED SCHOOL
-    //             ========================================================= */}
-
-    //             <div className="mt-10 rounded-2xl border border-primary/20 bg-primary/5 p-5">
-
-    //                 <div className="flex items-center gap-4">
-
-    //                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-xl text-primary-content">
-    //                         🏫
-    //                     </div>
-
-
-    //                     <div className="min-w-0 flex-1">
-
-    //                         <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-    //                             Selected School
-    //                         </p>
-
-
-    //                         <h2 className="mt-1 truncate font-bold">
-    //                             {
-    //                                 registrationData.school_name ||
-    //                                 "School selected"
-    //                             }
-    //                         </h2>
-
-
-    //                         {registrationData.eiin && (
-
-    //                             <p className="mt-1 text-xs text-base-content/50">
-
-    //                                 EIIN:{" "}
-
-    //                                 {
-    //                                     registrationData.eiin
-    //                                 }
-
-    //                             </p>
-
-    //                         )}
-
-    //                     </div>
-
-
-    //                     <button
-    //                         type="button"
-    //                         onClick={() =>
-    //                             navigate(
-    //                                 "/register/student/school"
-    //                             )
-    //                         }
-    //                         className="btn btn-ghost btn-sm"
-    //                     >
-    //                         Change
-    //                     </button>
-
-    //                 </div>
-
-    //             </div>
-
-
-    //             {/* =========================================================
-    //                 FORM
-    //             ========================================================= */}
-
-    //             <form
-    //                 onSubmit={handleSubmit}
-    //                 className="mt-6 rounded-3xl border border-base-300 bg-base-100 p-6 shadow-sm sm:p-8"
-    //             >
-
-
-    //                 {/* =====================================================
-    //                     ERROR
-    //                 ===================================================== */}
-
-    //                 {error && (
-
-    //                     <div className="alert alert-error mb-6">
-
-    //                         <span className="text-sm">
-    //                             {error}
-    //                         </span>
-
-    //                     </div>
-
-    //                 )}
-
-
-    //                 {/* =====================================================
-    //                     CLASS
-    //                 ===================================================== */}
-
-    //                 <div>
-
-    //                     <label
-    //                         htmlFor="student-class"
-    //                         className="label"
-    //                     >
-
-    //                         <span className="label-text font-semibold">
-    //                             Class
-    //                         </span>
-
-    //                     </label>
-
-
-    //                     <select
-    //                         id="student-class"
-    //                         value={classId}
-    //                         onChange={handleClassChange}
-    //                         disabled={
-    //                             loadingClasses ||
-    //                             !schoolId
-    //                         }
-    //                         className="select select-bordered h-12 w-full rounded-xl"
-    //                     >
-
-    //                         <option value="">
-    //                             {
-    //                                 loadingClasses
-    //                                     ? "Loading classes..."
-    //                                     : "Select your class"
-    //                             }
-    //                         </option>
-
-
-    //                         {classes.map((item) => {
-
-    //                             const id =
-    //                                 item._id
-    //                             // ||
-    //                             // item.class_code;
-
-    //                             const name =
-    //                                 item.name ||
-    //                                 item.class_name;
-
-    //                             return (
-
-    //                                 <option
-    //                                     key={id}
-    //                                     value={id}
-    //                                 >
-    //                                     {name}
-    //                                 </option>
-
-    //                             );
-
-    //                         })}
-
-    //                     </select>
-
-
-    //                     <p className="mt-2 text-xs text-base-content/50">
-    //                         Select the class in which you
-    //                         are currently enrolled.
-    //                     </p>
-
-    //                 </div>
-
-
-    //                 {/* =====================================================
-    //                     SECTION
-    //                 ===================================================== */}
-
-    //                 <div className="mt-6">
-
-    //                     <label
-    //                         htmlFor="student-section"
-    //                         className="label"
-    //                     >
-
-    //                         <span className="label-text font-semibold">
-    //                             Section
-    //                         </span>
-
-    //                     </label>
-
-
-    //                     <select
-    //                         id="student-section"
-    //                         value={sectionId}
-    //                         onChange={
-    //                             handleSectionChange
-    //                         }
-    //                         disabled={
-    //                             !classId ||
-    //                             loadingSections
-    //                         }
-    //                         className="select select-bordered h-12 w-full rounded-xl"
-    //                     >
-
-    //                         <option value="">
-
-    //                             {
-    //                                 !classId
-    //                                     ? "Select class first"
-    //                                     : loadingSections
-    //                                         ? "Loading sections..."
-    //                                         : "Select your section"
-    //                             }
-
-    //                         </option>
-
-
-    //                         {sections.map((item) => {
-
-    //                             const id =
-    //                                 item._id ||
-    //                                 item.section_id;
-
-    //                             const name =
-    //                                 item.name ||
-    //                                 item.section_name;
-
-    //                             return (
-
-    //                                 <option
-    //                                     key={id}
-    //                                     value={id}
-    //                                 >
-    //                                     {name}
-    //                                 </option>
-
-    //                             );
-
-    //                         })}
-
-    //                     </select>
-
-
-    //                     <p className="mt-2 text-xs text-base-content/50">
-    //                         Select your current section.
-    //                     </p>
-
-    //                 </div>
-
-
-    //                 {/* =====================================================
-    //                     ROLL NUMBER
-    //                 ===================================================== */}
-
-    //                 <div className="mt-6">
-
-    //                     <label
-    //                         htmlFor="student-roll"
-    //                         className="label"
-    //                     >
-
-    //                         <span className="label-text font-semibold">
-    //                             Roll Number
-    //                         </span>
-
-    //                     </label>
-
-
-    //                     <input
-    //                         id="student-roll"
-    //                         type="text"
-    //                         inputMode="numeric"
-    //                         value={rollNumber}
-    //                         onChange={handleRollChange}
-    //                         placeholder="Enter your roll number"
-    //                         className="input input-bordered h-12 w-full rounded-xl"
-    //                     />
-
-
-    //                     <p className="mt-2 text-xs text-base-content/50">
-    //                         Enter the roll number assigned
-    //                         to you by your school.
-    //                     </p>
-
-    //                 </div>
-
-
-    //                 {/* =====================================================
-    //                     INFORMATION NOTE
-    //                 ===================================================== */}
-
-    //                 <div className="mt-6 rounded-2xl border border-base-300 bg-base-200/50 p-4">
-
-    //                     <div className="flex gap-3">
-
-    //                         <span className="text-lg">
-    //                             ℹ️
-    //                         </span>
-
-
-    //                         <div>
-
-    //                             <p className="text-sm font-semibold">
-    //                                 Why do we need this?
-    //                             </p>
-
-
-    //                             <p className="mt-1 text-xs leading-5 text-base-content/50">
-    //                                 Your academic information
-    //                                 helps your school identify
-    //                                 your correct class and
-    //                                 section. The school can
-    //                                 review this information
-    //                                 before approving your
-    //                                 registration request.
-    //                             </p>
-
-    //                         </div>
-
-    //                     </div>
-
-    //                 </div>
-
-
-    //                 {/* =====================================================
-    //                     BUTTON
-    //                 ===================================================== */}
-
-    //                 <button
-    //                     type="submit"
-    //                     disabled={
-    //                         loadingClasses ||
-    //                         loadingSections ||
-    //                         !classId ||
-    //                         !sectionId ||
-    //                         !rollNumber.trim()
-    //                     }
-    //                     className="btn btn-primary mt-8 h-12 w-full rounded-xl"
-    //                 >
-    //                     Continue →
-    //                 </button>
-
-    //             </form>
-
-
-    //             {/* =========================================================
-    //                 FOOTER
-    //             ========================================================= */}
-
-    //             <p className="mx-auto mt-6 max-w-xl text-center text-xs leading-5 text-base-content/40">
-    //                 You can review your academic
-    //                 information before completing
-    //                 your registration.
-    //             </p>
-
-
-    //             {/* =========================================================
-    //                 DEBUG
-    //             ========================================================= */}
-
-    //             {import.meta.env.DEV && (
-
-    //                 <pre className="mt-8 overflow-auto rounded-xl bg-neutral p-4 text-xs text-neutral-content">
-    //                     {JSON.stringify(
-    //                         registrationData,
-    //                         null,
-    //                         2
-    //                     )}
-    //                 </pre>
-
-    //             )}
-
-    //         </div>
-
-    //     </div>
-    // );
+  }
+
+  return (
+    <div className="min-h-screen bg-base-200 px-4 py-8">
+      <div className="mx-auto max-w-3xl">
+        <div className="card bg-base-100 shadow-xl">
+          <div className="card-body p-5 sm:p-8">
+            <p className="text-sm font-semibold uppercase tracking-wide text-primary">
+              Parent Registration
+            </p>
+
+            <h1 className="text-2xl font-bold sm:text-3xl">
+              Find Your Children
+            </h1>
+
+            <p className="text-sm text-base-content/70">
+              Select each child's class and section, enter the roll
+              number, and find the matching student.
+            </p>
+
+            <div className="alert alert-info mt-3">
+              <div>
+                <p className="font-semibold">Selected School</p>
+                <p>
+                  {registrationData?.school_name || "Selected school"}
+                </p>
+                {registrationData?.eiin && (
+                  <p className="text-sm">
+                    EIIN: {registrationData.eiin}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {error && (
+              <div className="alert alert-error mt-4">
+                <span>{error}</span>
+              </div>
+            )}
+
+            {loadingClasses ? (
+              <div className="flex justify-center py-10">
+                <span className="loading loading-spinner loading-lg" />
+              </div>
+            ) : (
+              <form
+                onSubmit={handleSubmit}
+                className="mt-5 space-y-6"
+              >
+                {children.map((child, index) => (
+                  <div
+                    key={child.childId}
+                    className="space-y-4 rounded-xl border border-base-300 p-4 sm:p-5"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <h2 className="text-lg font-bold">
+                        Child {index + 1}
+                      </h2>
+
+                      {children.length > 1 && (
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-outline btn-error"
+                          onClick={() => removeChild(child.childId)}
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div className="form-control">
+                        <label
+                          className="label"
+                          htmlFor={`class-${child.childId}`}
+                        >
+                          <span className="label-text font-medium">
+                            Class
+                          </span>
+                        </label>
+
+                        <select
+                          id={`class-${child.childId}`}
+                          className="select select-bordered w-full"
+                          value={child.class_id}
+                          onChange={(event) =>
+                            handleClassChange(
+                              child.childId,
+                              event.target.value
+                            )
+                          }
+                          required
+                        >
+                          <option value="">Select class</option>
+
+                          {classes.map((item) => (
+                            <option
+                              key={getId(item)}
+                              value={getId(item)}
+                            >
+                              {getClassName(item)}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="form-control">
+                        <label
+                          className="label"
+                          htmlFor={`section-${child.childId}`}
+                        >
+                          <span className="label-text font-medium">
+                            Section
+                          </span>
+                        </label>
+
+                        <select
+                          id={`section-${child.childId}`}
+                          className="select select-bordered w-full"
+                          value={child.section_id}
+                          onChange={(event) =>
+                            handleSectionChange(
+                              child.childId,
+                              event.target.value
+                            )
+                          }
+                          disabled={
+                            !child.class_id ||
+                            Boolean(loadingSections[child.childId])
+                          }
+                          required
+                        >
+                          <option value="">
+                            {loadingSections[child.childId]
+                              ? "Loading sections..."
+                              : "Select section"}
+                          </option>
+
+                          {(sectionsByChild[child.childId] ?? []).map(
+                            (section) => (
+                              <option
+                                key={getId(section)}
+                                value={getId(section)}
+                              >
+                                {getSectionName(section)}
+                              </option>
+                            )
+                          )}
+                        </select>
+                      </div>
+
+                      <div className="form-control sm:col-span-2">
+                        <label
+                          className="label"
+                          htmlFor={`roll-${child.childId}`}
+                        >
+                          <span className="label-text font-medium">
+                            Student Roll Number
+                          </span>
+                        </label>
+
+                        <div className="flex flex-col gap-2 sm:flex-row">
+                          <input
+                            id={`roll-${child.childId}`}
+                            type="text"
+                            className="input input-bordered w-full"
+                            placeholder="Enter roll number"
+                            value={child.student_roll}
+                            onChange={(event) =>
+                              handleRollChange(
+                                child.childId,
+                                event.target.value
+                              )
+                            }
+                            autoComplete="off"
+                            required
+                          />
+
+                          <button
+                            type="button"
+                            className="btn btn-primary"
+                            onClick={() => findStudent(child.childId)}
+                            disabled={
+                              child.lookupStatus === "loading" ||
+                              !child.class_id ||
+                              !child.section_id ||
+                              !child.student_roll.trim()
+                            }
+                          >
+                            {child.lookupStatus === "loading" ? (
+                              <span className="loading loading-spinner loading-sm" />
+                            ) : (
+                              "Find Student"
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {child.lookupStatus === "error" && (
+                      <div className="alert alert-error">
+                        <span>{child.lookupMessage}</span>
+                      </div>
+                    )}
+
+                    {child.lookupStatus === "success" &&
+                      child.student && (
+                        <div className="rounded-xl border border-success/40 bg-success/5 p-4">
+                          <div className="mb-3 flex items-center gap-2">
+                            <span className="text-success">
+                              ✓
+                            </span>
+                            <h3 className="font-bold">
+                              Student Found
+                            </h3>
+                          </div>
+
+                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <div>
+                              <p className="text-sm text-base-content/60">
+                                Student Name
+                              </p>
+                              <p className="font-semibold">
+                                {child.student.full_name ||
+                                  [
+                                    child.student.first_name,
+                                    child.student.last_name,
+                                  ]
+                                    .filter(Boolean)
+                                    .join(" ") ||
+                                  child.student.name ||
+                                  "Not available"}
+                              </p>
+                            </div>
+
+                            <div>
+                              <p className="text-sm text-base-content/60">
+                                Student ID
+                              </p>
+                              <p className="font-semibold">
+                                {child.student.student_id ||
+                                  child.student._id ||
+                                  "Not available"}
+                              </p>
+                            </div>
+
+                            <div>
+                              <p className="text-sm text-base-content/60">
+                                Roll Number
+                              </p>
+                              <p className="font-semibold">
+                                {child.student.roll_number}
+                              </p>
+                            </div>
+
+                            <div>
+                              <p className="text-sm text-base-content/60">
+                                Class
+                              </p>
+                              <p className="font-semibold">
+                                {child.student.class_name ||
+                                  child.class_name}
+                              </p>
+                            </div>
+
+                            <div>
+                              <p className="text-sm text-base-content/60">
+                                Section
+                              </p>
+                              <p className="font-semibold">
+                                {child.student.section_name ||
+                                  child.section_name}
+                              </p>
+                            </div>
+
+                            <div>
+                              <p className="text-sm text-base-content/60">
+                                Status
+                              </p>
+                              <p className="font-semibold">
+                                {child.student.status || "Registered"}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                  </div>
+                ))}
+
+                <button
+                  type="button"
+                  className="btn btn-outline btn-primary w-full"
+                  onClick={addChild}
+                >
+                  + Add Another Child
+                </button>
+
+                <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-between">
+                  <button
+                    type="button"
+                    className="btn btn-ghost"
+                    onClick={() =>
+                      navigate("/register/parent/school")
+                    }
+                    disabled={submitting}
+                  >
+                    Back
+                  </button>
+
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={submitting}
+                  >
+                    Continue to Account
+                  </button>
+                </div>
+              </form>
+            )}
+
+            <p className="mt-3 text-center text-xs text-base-content/60">
+              Step 2 of 4 — Academic Information
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
-
-export default ParentAcademic;

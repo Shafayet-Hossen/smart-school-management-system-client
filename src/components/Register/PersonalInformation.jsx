@@ -82,7 +82,7 @@ function PersonalInformation() {
             setError("Invalid registration role. Please select your role again.");
             return;
         }
-
+        // console.log("registrationData", registrationData);
         navigate(nextRoute);
     };
 

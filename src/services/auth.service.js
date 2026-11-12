@@ -19,10 +19,10 @@ export const loginUser = async (
     );
 
   const firebaseUser = result.user;
-  console.log("Login User Auth.service: ",firebaseUser);
+  // console.log("Login User Auth.service: ",firebaseUser);
   
   const idToken = await firebaseUser.getIdToken();
-  console.log("IdToken Auth.service: ",idToken)
+  // console.log("IdToken Auth.service: ",idToken)
 
   return {
     firebaseUser,
@@ -42,19 +42,19 @@ export const createUser = async (
       password
     );
   
-  console.log("createUser result:",result);
+  // console.log("createUser result:",result);
 
   const firebase_user = result.user;
 
   try{
     await updateProfile(auth.currentUser, obj);
-    console.log("Profile updated successfully");
+    // console.log("Profile updated successfully");
   }catch(error){
-    console.log("Error updating profile:",error);
+    // console.log("Error updating profile:",error);
   }
 
   const idToken = await firebase_user.getIdToken();
-  console.log("IdToken Auth.service: ",idToken);
+  // console.log("IdToken Auth.service: ",idToken);
   
   return {
     firebase_user,
